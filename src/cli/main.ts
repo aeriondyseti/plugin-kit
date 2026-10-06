@@ -4,11 +4,15 @@
  * work itself lives in the modules beside this one, where it's tested.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fixturesModule, loadFixture, loadFixtures, recordFixture, type Fixture } from '../fixtures.js';
 import { addKit, VENDOR_TARGETS, vendorFiles, type VendorTarget } from './addKit.js';
+import { composeStatusLine, DEFAULT_STATUS_LINE, parseStatusLineConfig } from '../statusline/compose.js';
+import { parseStatusLine, type StatusLineInput } from '../statusline/input.js';
+import { SOURCES } from '../statusline/sources.js';
 import { formatResults, runFixtures } from './run.js';
 
 const USAGE = `usage: plugin-kit <command>
@@ -19,7 +23,10 @@ const USAGE = `usage: plugin-kit <command>
   record [--out <dir>]                   (a command hook) save each payload as a fixture
   run <command> <fixture|dir>... [--event <E>] [--json]
                                          replay fixtures through a hook command
-  fixtures <dir> [--out <file.ts>]       fixtures as a TS module, for mod tests`;
+  fixtures <dir> [--out <file.ts>]       fixtures as a TS module, for mod tests
+  statusline [--config <file>]           a status line command (settings.json "statusLine")
+  statusline --check [--config <file>]   preview a config and list its problems
+  statusline --list                      the sources a config can use`;
 
 type Args = { positional: string[]; flags: Map<string, string | true> };
 
@@ -79,6 +86,25 @@ Then draw:
         return results.some((r) => r.problem) ? 1 : 0;
     },
 
+    statusline: ({ flags }) => {
+        if (flags.has('list')) {
+            const width = Math.max(...Object.keys(SOURCES).map((n) => n.length));
+            for (const [name, source] of Object.entries(SOURCES)) console.log(`${name.padEnd(width)}  ${source.describe}`);
+            return 0;
+        }
+        const explicit = typeof flags.get('config') === 'string' ? (flags.get('config') as string) : undefined;
+        if (flags.has('check')) return checkStatusLine(explicit);
+        // The status line itself: draw something whatever goes wrong.
+        try {
+            const input = parseStatusLine();
+            const { config } = loadStatusLineConfig(explicit, input.workspace?.project_dir ?? input.cwd);
+            process.stdout.write(`${composeStatusLine(config.config, input)}\n`);
+        } catch (err) {
+            process.stdout.write(`plugin-kit statusline: ${err instanceof Error ? err.message : String(err)}\n`);
+        }
+        return 0;
+    },
+
     fixtures: ({ positional, flags }) => {
         const dir = positional[0];
         if (!dir) throw new UsageError('fixtures needs the folder of recorded fixtures');
@@ -121,12 +147,54 @@ function vendor(target: VendorTarget, dir = '.'): number {
     return 0;
 }
 
+/** The config to use: `--config`, else the project's, else the user's, else the default. */
+function loadStatusLineConfig(explicit: string | undefined, projectDir: string | undefined) {
+    const candidates = explicit
+        ? [resolve(explicit)]
+        : [
+            ...(projectDir ? [join(projectDir, '.claude', 'statusline.json')] : []),
+            join(homedir(), '.claude', 'statusline.json'),
+        ];
+    const path = candidates.find((p) => existsSync(p));
+    if (explicit && !path) throw new Error(`no config at ${explicit}`);
+    if (!path) return { path: undefined, config: { config: DEFAULT_STATUS_LINE, warnings: [] } };
+    let raw: unknown;
+    try {
+        raw = JSON.parse(readFileSync(path, 'utf8'));
+    } catch {
+        return { path, config: { config: DEFAULT_STATUS_LINE, warnings: [`${path} is not valid JSON; using the default`] } };
+    }
+    return { path, config: parseStatusLineConfig(raw) };
+}
+
+const SAMPLE_STATUS_INPUT: StatusLineInput = {
+    model: { id: 'claude-opus-5-5', display_name: 'Opus 5.5' },
+    workspace: { current_dir: process.cwd(), project_dir: process.cwd() },
+    cost: { total_cost_usd: 1.23, total_duration_ms: 1_520_000, total_lines_added: 120, total_lines_removed: 34 },
+    context_window: { used_percentage: 72, total_input_tokens: 144_000, context_window_size: 200_000 },
+    rate_limits: { five_hour: { used_percentage: 38 }, seven_day: { used_percentage: 91 } },
+    prompt_cache: { hit_ratio: 0.88, warm: true },
+    pr: { number: 42, review_state: 'pending' },
+    effort: { level: 'high' },
+    session_name: 'sample',
+    version: '2.1.290',
+};
+
+function checkStatusLine(explicit: string | undefined): number {
+    const { path, config } = loadStatusLineConfig(explicit, process.cwd());
+    console.log(path ? `config: ${path}` : 'config: none found, using the default');
+    for (const warning of config.warnings) console.log(`  ⚠ ${warning}`);
+    console.log('\npreview (sample session):\n');
+    console.log(composeStatusLine(config.config, SAMPLE_STATUS_INPUT));
+    return config.warnings.length ? 1 : 0;
+}
+
 class UsageError extends Error {}
 
 function parseArgs(argv: string[]): Args {
     const positional: string[] = [];
     const flags = new Map<string, string | true>();
-    const valued = new Set(['out', 'event']);
+    const valued = new Set(['out', 'event', 'config']);
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i]!;
         if (!arg.startsWith('--')) {

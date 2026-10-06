@@ -7,6 +7,7 @@ export default defineConfig({
         widgets: 'src/widgets/index.ts',
         cli: 'src/cli/main.ts',
         adapter: 'src/adapter/index.ts',
+        statusline: 'src/statusline/index.ts',
     },
     format: ['esm'],
     dts: true,

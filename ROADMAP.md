@@ -10,12 +10,6 @@ folding, the marketplace, `add-kit`, user settings, `appendWidgets`, and
 the rename to `@aeriondyseti/plugin-kit` (2.0.0).
 Next, in order:
 
-### Status line composition
-
-Lines of widgets bound to named sources (`session.context_pct`,
-`session.model`, usage) that plugins can add to. Claude Code's status-line
-JSON is a sibling of hook input; type it and compose from it.
-
 ### More kit-owned interactions
 
 `Input` and `Select` need `onInput`/`onSelect` closures the same way
