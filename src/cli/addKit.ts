@@ -41,7 +41,7 @@ export function addKit(pluginDir: string, hydrateSource: string): AddKitResult {
         writeFileSync(manifestPath, `${JSON.stringify(manifest, null, indentOf(manifestText))}\n`);
     }
 
-    const target = join(hooksFolder(pluginDir), 'hydrate.ts');
+    const target = hydratePath(pluginDir);
     const wanted = HYDRATE_HEADER + hydrateSource;
     const current = existsSync(target) ? readFileSync(target, 'utf8') : undefined;
     const hydrate = current === undefined ? 'created' : current === wanted ? 'unchanged' : 'updated';
@@ -85,6 +85,23 @@ export interface VendorResult {
     unchanged: number;
 }
 
+/** Where `vendor <target>` writes in a plugin. */
+export function vendorFolder(pluginDir: string, target: VendorTarget): string {
+    return target === 'testing' ? join(pluginDir, 'tests', 'kit-testing') : join(hooksFolder(pluginDir), target);
+}
+
+/** Exactly what `vendor <target>` writes for these sources: file name → text. */
+export function vendoredTexts(target: VendorTarget, sources: Record<string, string>): Record<string, string> {
+    const header = target === 'kit' ? VENDOR_HEADER : VENDOR_HEADER.replace('add-kit --vendor', `vendor ${target}`);
+    const files = target === 'kit' ? { ...sources, 'index.ts': VENDOR_INDEX } : sources;
+    return Object.fromEntries(Object.entries(files).map(([name, source]) => [name, `${header}\n${source.replace(/^\/\/[^\n]*\n\n?/, '')}`]));
+}
+
+/** Where `add-kit` puts hydrate.ts in a plugin. */
+export function hydratePath(pluginDir: string): string {
+    return join(hooksFolder(pluginDir), 'hydrate.ts');
+}
+
 /**
  * Copies `sources` (file name → text) into the target's folder in the
  * plugin. Each source's own first-line header comment is replaced by one
@@ -94,14 +111,11 @@ export function vendorFiles(pluginDir: string, target: VendorTarget, sources: Re
     if (!existsSync(join(pluginDir, '.claude-plugin', 'plugin.json'))) {
         throw new Error(`${pluginDir} is not a plugin: no .claude-plugin/plugin.json`);
     }
-    const folder = target === 'testing' ? join(pluginDir, 'tests', 'kit-testing') : join(hooksFolder(pluginDir), target);
-    const header = target === 'kit' ? VENDOR_HEADER : VENDOR_HEADER.replace('add-kit --vendor', `vendor ${target}`);
-    const files = target === 'kit' ? { ...sources, 'index.ts': VENDOR_INDEX } : sources;
+    const folder = vendorFolder(pluginDir, target);
     mkdirSync(folder, { recursive: true });
     let written = 0;
     let unchanged = 0;
-    for (const [name, source] of Object.entries(files)) {
-        const wanted = `${header}\n${source.replace(/^\/\/[^\n]*\n\n?/, '')}`;
+    for (const [name, wanted] of Object.entries(vendoredTexts(target, sources))) {
         const target = join(folder, name);
         if (existsSync(target) && readFileSync(target, 'utf8') === wanted) {
             unchanged++;
