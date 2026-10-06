@@ -26,6 +26,14 @@
         "./widgets": {
             "types": "./dist/widgets.d.ts",
             "import": "./dist/widgets.js"
+        },
+        "./adapter": {
+            "types": "./dist/adapter.d.ts",
+            "import": "./dist/adapter.js"
+        },
+        "./statusline": {
+            "types": "./dist/statusline.d.ts",
+            "import": "./dist/statusline.js"
         }
     },
     "bin": {
@@ -35,6 +43,8 @@
         "dist",
         "src/widgets/hydrate.ts",
         "plugin/hooks/kit",
+        "src/adapter/index.ts",
+        "src/mod-testing/index.ts",
         "examples",
         "README.md",
         "CHANGELOG.md",

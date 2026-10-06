@@ -11,6 +11,16 @@
 - [Widgets in Mods](Widgets-in-Mods.md)
 - [The plugin-kit Plugin](The-plugin-kit-Plugin.md)
 
-**More**
+**Mods**
+- [Hooks in Mods](Hooks-in-Mods.md)
+
+**Status line**
+- [Status Line](Status-Line.md)
+
+**Testing**
 - [Testing](Testing.md)
+- [Fixtures](Fixtures.md)
+
+**More**
+- [CLI](CLI.md)
 - [Contributing](Contributing.md)

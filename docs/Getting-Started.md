@@ -6,13 +6,17 @@
 npm install @aeriondyseti/plugin-kit
 ```
 
-Node 20 or newer, ESM only. Three entry points:
+Node 20 or newer, ESM only. Five entry points:
 
 | Import | Holds |
 | --- | --- |
 | `@aeriondyseti/plugin-kit` | hook event classes, `runHook`, `OutputBuilder`, tags, icons, shared types |
 | `@aeriondyseti/plugin-kit/widgets` | widget types, validation, catalog, renderers, `hydrate` (pure: no Node, no dependencies) |
-| `@aeriondyseti/plugin-kit/testing` | `testHook` and a `mockXxx` input factory per event |
+| `@aeriondyseti/plugin-kit/testing` | `testHook`, a `mockXxx` input factory per event, fixtures |
+| `@aeriondyseti/plugin-kit/statusline` | status line input types, sources, composition |
+| `@aeriondyseti/plugin-kit/adapter` | command hook ↔ mod translation (pure; vendored into mods) |
+
+It also installs the `plugin-kit` command ([CLI](CLI.md)).
 
 Writing a **mod** instead of a hook script? Mods don't install npm packages;
 skip to [Widgets in Mods](Widgets-in-Mods.md).

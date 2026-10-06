@@ -1,45 +1,43 @@
 #!/usr/bin/env node
 /**
- * The `plugin-kit` command. One subcommand today, in two modes:
- *
- *   npx @aeriondyseti/plugin-kit add-kit [plugin-dir]            depend on the plugin, use $.kit
- *   npx @aeriondyseti/plugin-kit add-kit --vendor [plugin-dir]   copy the widget code in
+ * The `plugin-kit` command. Each subcommand is a function in COMMANDS; the
+ * work itself lives in the modules beside this one, where it's tested.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { addKit, vendorKit } from './addKit.js';
+import { fixturesModule, loadFixture, loadFixtures, recordFixture, type Fixture } from '../fixtures.js';
+import { addKit, VENDOR_TARGETS, vendorFiles, type VendorTarget } from './addKit.js';
+import { composeStatusLine, DEFAULT_STATUS_LINE, parseStatusLineConfig } from '../statusline/compose.js';
+import { parseStatusLine, type StatusLineInput } from '../statusline/input.js';
+import { SOURCES } from '../statusline/sources.js';
+import { formatResults, runFixtures } from './run.js';
 
-const USAGE = 'usage: npx @aeriondyseti/plugin-kit add-kit [--vendor] [plugin-dir]';
+const USAGE = `usage: plugin-kit <command>
 
-const args = process.argv.slice(2);
-const [command, ...rest] = args;
-const vendor = rest.includes('--vendor');
-const dir = rest.find((arg) => !arg.startsWith('--')) ?? '.';
-if (command !== 'add-kit' || rest.some((arg) => arg.startsWith('--') && arg !== '--vendor')) {
-    console.error(USAGE);
-    process.exit(command === undefined || command === '--help' ? 0 : 1);
-}
+  add-kit [--vendor] [plugin-dir]        set a plugin up to draw kit widgets
+  vendor <kit|adapter|testing> [plugin-dir]
+                                         copy kit code into a plugin (mods can't import npm)
+  record [--out <dir>]                   (a command hook) save each payload as a fixture
+  run <command> <fixture|dir>... [--event <E>] [--json]
+                                         replay fixtures through a hook command
+  fixtures <dir> [--out <file.ts>]       fixtures as a TS module, for mod tests
+  statusline [--config <file>]           a status line command (settings.json "statusLine")
+  statusline --check [--config <file>]   preview a config and list its problems
+  statusline --list                      the sources a config can use`;
 
-// Shipped in the package beside dist/, so the copies are always this version's.
+type Args = { positional: string[]; flags: Map<string, string | true> };
+
+// Shipped in the package beside dist/, so copies are always this version's.
 const shipped = (path: string) => fileURLToPath(new URL(`../${path}`, import.meta.url));
-const hydrateSource = readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8');
 
-try {
-    if (vendor) {
-        const kitDir = shipped('plugin/hooks/kit');
-        const sources: Record<string, string> = { 'hydrate.ts': hydrateSource };
-        for (const name of readdirSync(kitDir)) sources[name] = readFileSync(`${kitDir}/${name}`, 'utf8');
-        const result = vendorKit(resolve(dir), sources);
-        console.log(`✓ ${result.folder}/: ${result.written} written, ${result.unchanged} unchanged`);
-        console.log(`
-Then draw, with no dependency on the plugin-kit plugin:
-  import { describeWidgets, hydrate } from './kit/index.ts'
-  const tree = describeWidgets(widgets, { id: \`my-plugin:\${e.requestId}\` })
-  return <Box>{hydrate(tree, h)}</Box>`);
-    } else {
-        const result = addKit(resolve(dir), hydrateSource);
+const COMMANDS: Record<string, (args: Args) => number> = {
+    'add-kit': ({ positional, flags }) => {
+        if (flags.has('vendor')) return vendor('kit', positional[0]);
+        const dir = resolve(positional[0] ?? '.');
+        const result = addKit(dir, readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8'));
         console.log(result.dependencyAdded
             ? '✓ plugin.json now depends on plugin-kit@aeriondyseti-plugins'
             : '· plugin.json already depends on plugin-kit');
@@ -51,8 +49,180 @@ For installing your plugin to install the kit too, add to your marketplace.json:
 Then draw:
   const tree = await $.kit.render({ id: \`my-plugin:\${e.requestId}\`, widgets })
   return <Box>{hydrate(tree, h)}</Box>`);
+        return 0;
+    },
+
+    vendor: ({ positional }) => {
+        const [target, dir] = positional;
+        if (!VENDOR_TARGETS.includes(target as VendorTarget)) throw new UsageError(`vendor needs one of ${VENDOR_TARGETS.join(', ')}`);
+        return vendor(target as VendorTarget, dir);
+    },
+
+    // Runs as a command hook: it must never get in Claude Code's way, so it
+    // prints nothing to stdout and exits 0 whatever happens.
+    record: ({ flags }) => {
+        const out = typeof flags.get('out') === 'string'
+            ? resolve(flags.get('out') as string)
+            : join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'fixtures');
+        try {
+            const path = recordFixture(readFileSync(0, 'utf8'), out);
+            process.stderr.write(`plugin-kit: recorded ${path}\n`);
+        } catch (err) {
+            process.stderr.write(`plugin-kit record: ${err instanceof Error ? err.message : String(err)}\n`);
+        }
+        return 0;
+    },
+
+    run: ({ positional, flags }) => {
+        const [command, ...targets] = positional;
+        if (!command || targets.length === 0) throw new UsageError('run needs a command and at least one fixture or folder');
+        const event = typeof flags.get('event') === 'string' ? (flags.get('event') as string) : undefined;
+        const fixtures = targets.flatMap((target): Fixture[] =>
+            statSync(target).isDirectory() ? loadFixtures(target, event ? { event } : {}) : [loadFixture(target)],
+        );
+        if (fixtures.length === 0) throw new Error(`no fixtures found${event ? ` for ${event}` : ''}`);
+        const results = runFixtures(command, fixtures);
+        console.log(flags.has('json') ? JSON.stringify(results, null, 2) : formatResults(results));
+        return results.some((r) => r.problem) ? 1 : 0;
+    },
+
+    statusline: ({ flags }) => {
+        if (flags.has('list')) {
+            const width = Math.max(...Object.keys(SOURCES).map((n) => n.length));
+            for (const [name, source] of Object.entries(SOURCES)) console.log(`${name.padEnd(width)}  ${source.describe}`);
+            return 0;
+        }
+        const explicit = typeof flags.get('config') === 'string' ? (flags.get('config') as string) : undefined;
+        if (flags.has('check')) return checkStatusLine(explicit);
+        // The status line itself: draw something whatever goes wrong.
+        try {
+            const input = parseStatusLine();
+            const { config } = loadStatusLineConfig(explicit, input.workspace?.project_dir ?? input.cwd);
+            process.stdout.write(`${composeStatusLine(config.config, input)}\n`);
+        } catch (err) {
+            process.stdout.write(`plugin-kit statusline: ${err instanceof Error ? err.message : String(err)}\n`);
+        }
+        return 0;
+    },
+
+    fixtures: ({ positional, flags }) => {
+        const dir = positional[0];
+        if (!dir) throw new UsageError('fixtures needs the folder of recorded fixtures');
+        const out = typeof flags.get('out') === 'string' ? resolve(flags.get('out') as string) : undefined;
+        const source = fixturesModule(loadFixtures(dir), dir);
+        if (!out) {
+            process.stdout.write(source);
+            return 0;
+        }
+        writeFileSync(out, source);
+        console.log(`✓ ${out}`);
+        return 0;
+    },
+};
+
+const VENDOR_USE: Record<VendorTarget, string> = {
+    kit: `Then draw, with no dependency on the plugin-kit plugin:
+  import { describeWidgets, hydrate } from './kit/index.ts'
+  const tree = describeWidgets(widgets, { id: \`my-plugin:\${e.requestId}\` })
+  return <Box>{hydrate(tree, h)}</Box>`,
+    adapter: `Then run a hook policy in your mod:
+  import { toClassic } from './adapter/index.ts'
+  on('classic.UserPromptSubmit', ($, e, next) => toClassic('UserPromptSubmit', handle(e)) ?? next(e))`,
+    testing: `Then, in a *.test.tsx:
+  import { mountTarget, SURFACES } from './kit-testing/index.ts'
+  const ui = await $.ui.mount(mountTarget('my-plugin', 'AbovePrompt', surface))`,
+};
+
+function vendor(target: VendorTarget, dir = '.'): number {
+    const sources: Record<string, string> = {};
+    if (target === 'kit') {
+        const kitDir = shipped('plugin/hooks/kit');
+        for (const name of readdirSync(kitDir)) sources[name] = readFileSync(join(kitDir, name), 'utf8');
+        sources['hydrate.ts'] = readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8');
+    } else {
+        sources['index.ts'] = readFileSync(shipped(target === 'adapter' ? 'src/adapter/index.ts' : 'src/mod-testing/index.ts'), 'utf8');
     }
+    const result = vendorFiles(resolve(dir), target, sources);
+    console.log(`✓ ${result.folder}/: ${result.written} written, ${result.unchanged} unchanged\n\n${VENDOR_USE[target]}`);
+    return 0;
+}
+
+/** The config to use: `--config`, else the project's, else the user's, else the default. */
+function loadStatusLineConfig(explicit: string | undefined, projectDir: string | undefined) {
+    const candidates = explicit
+        ? [resolve(explicit)]
+        : [
+            ...(projectDir ? [join(projectDir, '.claude', 'statusline.json')] : []),
+            join(homedir(), '.claude', 'statusline.json'),
+        ];
+    const path = candidates.find((p) => existsSync(p));
+    if (explicit && !path) throw new Error(`no config at ${explicit}`);
+    if (!path) return { path: undefined, config: { config: DEFAULT_STATUS_LINE, warnings: [] } };
+    let raw: unknown;
+    try {
+        raw = JSON.parse(readFileSync(path, 'utf8'));
+    } catch {
+        return { path, config: { config: DEFAULT_STATUS_LINE, warnings: [`${path} is not valid JSON; using the default`] } };
+    }
+    return { path, config: parseStatusLineConfig(raw) };
+}
+
+const SAMPLE_STATUS_INPUT: StatusLineInput = {
+    model: { id: 'claude-opus-5-5', display_name: 'Opus 5.5' },
+    workspace: { current_dir: process.cwd(), project_dir: process.cwd() },
+    cost: { total_cost_usd: 1.23, total_duration_ms: 1_520_000, total_lines_added: 120, total_lines_removed: 34 },
+    context_window: { used_percentage: 72, total_input_tokens: 144_000, context_window_size: 200_000 },
+    rate_limits: { five_hour: { used_percentage: 38 }, seven_day: { used_percentage: 91 } },
+    prompt_cache: { hit_ratio: 0.88, warm: true },
+    pr: { number: 42, review_state: 'pending' },
+    effort: { level: 'high' },
+    session_name: 'sample',
+    version: '2.1.290',
+};
+
+function checkStatusLine(explicit: string | undefined): number {
+    const { path, config } = loadStatusLineConfig(explicit, process.cwd());
+    console.log(path ? `config: ${path}` : 'config: none found, using the default');
+    for (const warning of config.warnings) console.log(`  ⚠ ${warning}`);
+    console.log('\npreview (sample session):\n');
+    console.log(composeStatusLine(config.config, SAMPLE_STATUS_INPUT));
+    return config.warnings.length ? 1 : 0;
+}
+
+class UsageError extends Error {}
+
+function parseArgs(argv: string[]): Args {
+    const positional: string[] = [];
+    const flags = new Map<string, string | true>();
+    const valued = new Set(['out', 'event', 'config']);
+    for (let i = 0; i < argv.length; i++) {
+        const arg = argv[i]!;
+        if (!arg.startsWith('--')) {
+            positional.push(arg);
+            continue;
+        }
+        const name = arg.slice(2);
+        if (valued.has(name)) {
+            const value = argv[++i];
+            if (value === undefined) throw new UsageError(`--${name} needs a value`);
+            flags.set(name, value);
+        } else {
+            flags.set(name, true);
+        }
+    }
+    return { positional, flags };
+}
+
+const [name, ...rest] = process.argv.slice(2);
+const command = name ? COMMANDS[name] : undefined;
+if (!command) {
+    console.error(USAGE);
+    process.exit(name === undefined || name === '--help' ? 0 : 1);
+}
+try {
+    process.exit(command(parseArgs(rest)));
 } catch (err) {
-    console.error(`add-kit: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`plugin-kit ${name}: ${err instanceof Error ? err.message : String(err)}`);
+    if (err instanceof UsageError) console.error(USAGE);
     process.exit(1);
 }
