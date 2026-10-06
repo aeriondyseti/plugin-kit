@@ -24,12 +24,12 @@ const hydrateSource = readFileSync(fileURLToPath(new URL('../src/widgets/hydrate
 try {
     const result = addKit(resolve(dir), hydrateSource);
     console.log(result.dependencyAdded
-        ? '✓ plugin.json now depends on plugin-kit@plugin-kit'
+        ? '✓ plugin.json now depends on plugin-kit@aeriondyseti-plugins'
         : '· plugin.json already depends on plugin-kit');
     console.log(`${result.hydrate === 'unchanged' ? '·' : '✓'} ${result.hydratePath} ${result.hydrate}`);
     console.log(`
 For installing your plugin to install the kit too, add to your marketplace.json:
-  "allowCrossMarketplaceDependenciesOn": ["plugin-kit"]
+  "allowCrossMarketplaceDependenciesOn": ["aeriondyseti-plugins"]
 
 Then draw:
   const tree = await $.kit.render({ id: \`my-plugin:\${e.requestId}\`, widgets })

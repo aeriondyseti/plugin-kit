@@ -6,11 +6,11 @@ owns the small interactions (a long list folds behind `+3 more`).
 
 ## Installing
 
-This repository is a marketplace named `plugin-kit`:
+plugin-kit is listed in the `aeriondyseti-plugins` marketplace:
 
 ```sh
-claude plugin marketplace add aeriondyseti/hook-kit
-claude plugin install plugin-kit@plugin-kit
+claude plugin marketplace add aeriondyseti/aeriondyseti-plugins
+claude plugin install plugin-kit@aeriondyseti-plugins
 ```
 
 ## Using it from your mod
@@ -18,21 +18,22 @@ claude plugin install plugin-kit@plugin-kit
 1. **Depend on it.** In your `.claude-plugin/plugin.json`:
 
    ```json
-   { "name": "my-mod", "dependencies": [{ "name": "plugin-kit", "marketplace": "plugin-kit" }] }
+   { "name": "my-mod", "dependencies": [{ "name": "plugin-kit", "marketplace": "aeriondyseti-plugins" }] }
    ```
 
    A bare `"plugin-kit"` would be looked up in *your* plugin's marketplace,
-   so name ours. For installing your plugin to install the kit too, your
-   marketplace's `marketplace.json` must allow it:
+   so name ours. (A plugin listed in `aeriondyseti-plugins` itself can write
+   just `"plugin-kit"`.) For installing your plugin to install the kit too,
+   your marketplace's `marketplace.json` must allow it:
 
    ```json
-   { "name": "your-marketplace", "allowCrossMarketplaceDependenciesOn": ["plugin-kit"], ... }
+   { "name": "your-marketplace", "allowCrossMarketplaceDependenciesOn": ["aeriondyseti-plugins"], ... }
    ```
 
    Without that line, your users install plugin-kit themselves first (the
    allowlist doesn't apply to a dependency that is already installed);
    otherwise your plugin installs but doesn't load, and `claude plugin list`
-   says `Dependency "plugin-kit@plugin-kit" is not installed`.
+   says `Dependency "plugin-kit@aeriondyseti-plugins" is not installed`.
 
    Claude Code lays the kit's contract into your
    `.claude-plugin/types/plugin-kit/`, so `$.kit` is typed.

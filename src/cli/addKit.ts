@@ -12,7 +12,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
 /** How a dependent plugin names the kit: ours is not in its marketplace. */
-export const KIT_DEPENDENCY = { name: 'plugin-kit', marketplace: 'plugin-kit' } as const;
+export const KIT_DEPENDENCY = { name: 'plugin-kit', marketplace: 'aeriondyseti-plugins' } as const;
 
 export const HYDRATE_HEADER =
     '// Copied by `npx @aeriondyseti/hook-kit add-kit`; run it again to update. Do not edit.\n\n';
