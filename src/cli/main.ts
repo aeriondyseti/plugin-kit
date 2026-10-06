@@ -16,6 +16,7 @@ import { parseStatusLine, type StatusLineInput } from '../statusline/input.js';
 import { SOURCES } from '../statusline/sources.js';
 import { applyRelease, describePlan, planRelease } from '../release/run.js';
 import { diagnose, formatFindings } from '../doctor/run.js';
+import { CI_TSCONFIG, CI_TYPES, copyEngineTypes } from './types.js';
 import { hookFiles, hookSettings, isHookEvent, kebab, modFiles, type FileMap, type KitMode } from '../scaffold/templates.js';
 import { HOOK_EVENT_NAMES } from '../common.js';
 import { formatResults, runFixtures } from './run.js';
@@ -35,6 +36,7 @@ const USAGE = `usage: plugin-kit <command>
   new hook <Event> [--dir <dir>] [--force]   a command hook with a test
   new mod <name> [--dir <dir>] [--kit|--vendor-kit] [--force]
                                          a mod with a pane, a test and test helpers
+  types [plugin-dir]                     copy Claude Code's mod types in, for CI type-checks
   doctor [dir] [--json] [--no-validate]  check a plugin (or a project's settings hooks) for what breaks it
   release <patch|minor|major|x.y.z> [--plugin <dir>] [--marketplace <file>] [--dry-run]
                                          bump, cut the CHANGELOG, commit and tag (never pushes)`;
@@ -149,6 +151,15 @@ Then draw:
             return 0;
         }
         throw new UsageError('new needs "hook <Event>" or "mod <name>"');
+    },
+
+    types: ({ positional }) => {
+        const dir = resolve(positional[0] ?? '.');
+        const result = copyEngineTypes(dir);
+        console.log(`✓ ${CI_TYPES}/ (${result.version})`);
+        if (result.tsconfigWritten) console.log(`✓ ${CI_TSCONFIG}`);
+        console.log(`\nCommit both; in CI: npx tsc -p ${CI_TSCONFIG}\nRe-run after Claude Code updates to pick up its new declarations.`);
+        return 0;
     },
 
     doctor: ({ positional, flags }) => {
