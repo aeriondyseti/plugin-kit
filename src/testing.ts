@@ -69,6 +69,7 @@ import type { WorktreeCreateInput } from './events/WorktreeCreate.js';
 import type { WorktreeRemoveInput } from './events/WorktreeRemove.js';
 
 export { HookParseError } from './events/_parse.js';
+export { fixturesModule, loadFixture, loadFixtures, type Fixture } from './fixtures.js';
 
 export interface TestHookResult<P = unknown> {
     /** The raw JSON that `emitOutput` would have written to stdout. */
@@ -119,7 +120,11 @@ interface NormalizablePayload {
     };
 }
 
-function summarize(payload: unknown): Omit<TestHookResult, 'payload' | 'exitCode'> {
+/**
+ * What a hook's JSON output decided, in `TestHookResult`'s terms. Shared by
+ * `testHook` and `plugin-kit run`, so both report a decision the same way.
+ */
+export function summarizeOutput(payload: unknown): Omit<TestHookResult, 'payload' | 'exitCode'> {
     const p = (payload ?? {}) as NormalizablePayload;
     const hs = p.hookSpecificOutput;
     const verdict = hs?.permissionDecision ?? hs?.decision?.behavior;
@@ -170,7 +175,7 @@ export function testHook<P = unknown>(
     return {
         payload: slot.payload as P,
         exitCode: slot.exitCode ?? 0,
-        ...summarize(slot.payload),
+        ...summarizeOutput(slot.payload),
     };
 }
 

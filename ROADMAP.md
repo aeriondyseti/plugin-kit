@@ -27,7 +27,42 @@ them. Later types from the roleplay spec: `sparkline` (needs history),
 
 Claude Code writes the classic hook inputs into every mod's
 `.claude-plugin/types/claude-code/index.d.ts`. A script that extracts them
-per release would replace the hand sync (see TECH-DEBT).
+per release would replace the hand sync (see TECH-DEBT). Typing that
+tracks Claude Code's version is the main draw of the closest competitor
+(cc-hooks-ts); automating it keeps us level without the chore. Once
+extracted, the same declarations could be published for mods to
+type-check in CI, where Claude Code isn't installed.
+
+## Developer tooling
+
+From the October 2026 market scan: gaps no other tool fills, or chores we
+hit ourselves.
+
+### `plugin-kit doctor`
+
+Check a plugin for what `claude plugin validate` reports late or opaquely:
+`$` stored or passed to a function, a function returned through a plugin
+noun, a `Button` without `onPress`, a mod tsconfig without
+`allowImportingTsExtensions`, a dependency not in an allowlisted
+marketplace, stale vendored kit copies. On Windows, show exactly how a
+command hook will be launched (shell, resolved executable, argv), the most
+reported hook bug there.
+
+### Plugin release helper
+
+`plugin-kit release <patch|minor|major>`: bump `package.json` and/or
+`plugin.json`, move the CHANGELOG's `[Unreleased]`, commit, tag, and open a
+PR moving the marketplace entry's `ref`/`sha` (or rewrite a local
+`marketplace.json`). Nothing in the ecosystem does this, and it's a manual
+step in our own release.
+
+### Scaffolding
+
+`plugin-kit new hook <Event>` (script, `handle()`, a test, settings
+snippet) and `plugin-kit new mod <name>` (manifest, `hooks.json`,
+`register.tsx`, tsconfig, a `claude plugin test` file, optional kit). Lower
+value than the rest: templates already exist (claude-code-plugin-template,
+tsuba), but ours would wire in the kit, fixtures and test helpers.
 
 ## OutputBuilder
 
