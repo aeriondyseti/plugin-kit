@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-06
+
+Widgets, and plugin-kit: a Claude Code plugin that draws them for mods.
+
 ### Added
 
 - `@aeriondyseti/hook-kit/widgets`: six widget types (`text`, `counter`,
@@ -19,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `plugin/`: **plugin-kit**, a Claude Code plugin that adds `$.kit`
   (`render`, `line`, `parse`, `catalog`) to every mod that lists it under
   `dependencies`, and folds long lists behind a button it answers itself.
-- The repository is a marketplace named `plugin-kit`:
-  `claude plugin install plugin-kit@plugin-kit`.
+- plugin-kit is listed in the `aeriondyseti-plugins` marketplace:
+  `claude plugin install plugin-kit@aeriondyseti-plugins`.
 - `npx @aeriondyseti/hook-kit add-kit [plugin-dir]`: adds the plugin-kit
   dependency to a plugin's `plugin.json` and copies `hydrate.ts` beside its
   hooks module. Idempotent; re-run to refresh the copy.
