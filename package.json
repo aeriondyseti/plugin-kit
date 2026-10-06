@@ -1,6 +1,6 @@
 {
     "name": "@aeriondyseti/plugin-kit",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "description": "Typed toolkit for Claude Code plugins: hook events, styled output, and shared widgets for mods via the plugin-kit plugin.",
     "type": "module",
     "repository": {

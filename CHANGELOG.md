@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-06
+
 ### Added
 
 - `add-kit --vendor`: copies the widget code and `hydrate` into a mod's
@@ -187,7 +189,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.1.0
 [2.0.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.1
 [2.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.0
 [1.2.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.1
