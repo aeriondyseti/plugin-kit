@@ -33,6 +33,7 @@ The npm package is
 | A **status line** | `plugin-kit statusline`, or `/statusline` in code | [Status Line](Status-Line.md) |
 | Tests for any of the above | `/testing`, recorded fixtures, `claude plugin test` helpers | [Testing](Testing.md), [Fixtures](Fixtures.md) |
 
-Every command is on the [CLI](CLI.md) page.
+Starting, checking, type-checking in CI and releasing a plugin:
+[Tooling](Tooling.md). Every command is on the [CLI](CLI.md) page.
 
 Working on plugin-kit itself? See [Contributing](Contributing.md).

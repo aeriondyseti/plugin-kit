@@ -23,6 +23,10 @@ skip to [Widgets in Mods](Widgets-in-Mods.md).
 
 ## Your first hook
 
+The quickest start: `npx @aeriondyseti/plugin-kit new hook PreToolUse`
+writes the hook and its test, and prints the settings entry
+([Tooling](Tooling.md#start-plugin-kit-new)). By hand, it looks like this.
+
 `.claude/hooks/pre-tool-use.ts`:
 
 ```ts

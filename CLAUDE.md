@@ -99,21 +99,24 @@ omissions are visible (goes in TECH-DEBT if it's a real deferral).
 
 Semver + [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-1. Bump `package.json` version.
-2. Move `[Unreleased]` entries to a dated `[x.y.z]` section in CHANGELOG.
-3. `npm run build && npm test && npx tsc --noEmit`.
-4. `npm pack --dry-run` — review the file list.
-5. Commit as `Release x.y.z`, then `git tag -a vx.y.z -m "Release x.y.z"`.
-   Annotated, not lightweight: `--follow-tags` skips lightweight tags, and
-   the tag push is what triggers the publish.
-6. `git push origin main --follow-tags` (user runs this). The tag fires
+1. `npm run build && npm test && npm run typecheck && npm run plugin:check`,
+   and `npm pack --dry-run` — review the file list.
+2. `node dist/cli.js release <patch|minor|major> --dry-run`, then without
+   `--dry-run`. It bumps `package.json` and the lockfile, moves
+   `[Unreleased]` to a dated section, commits `Release x.y.z` and creates
+   the annotated tag (`--follow-tags` skips lightweight ones). If `plugin/`
+   changed, add `--plugin plugin --marketplace <path to
+   aeriondyseti-plugins' .claude-plugin/marketplace.json>`: it bumps the
+   plugin's version too and pins its marketplace entry (`ref`, `sha`,
+   `version`) to the new tag.
+3. `git push origin main --follow-tags` (user runs this). The tag fires
    `.github/workflows/release.yml`, which re-runs the checks, publishes
    to npm via trusted publishing, and creates the GitHub release from the
-   version's CHANGELOG section (so that section must exist). Don't
-   `npm publish` or `gh release create` by hand.
-7. If `plugin/` changed, point plugin-kit's entry in the
-   `aeriondyseti-plugins` marketplace at the new tag: its `ref` and `sha`
-   (and `version`, if the plugin's own version moved).
+   version's CHANGELOG section. Don't `npm publish` or `gh release create`
+   by hand.
+4. If the marketplace was pinned, commit and push that repo after the tag
+   is pushed (the pin points at it).
+5. `npm run docs:wiki` if `docs/` changed.
 
 ## Memory and this file
 

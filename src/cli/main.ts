@@ -33,7 +33,8 @@ const USAGE = `usage: plugin-kit <command>
   statusline [--config <file>]           a status line command (settings.json "statusLine")
   statusline --check [--config <file>]   preview a config and list its problems
   statusline --list                      the sources a config can use
-  new hook <Event> [--dir <dir>] [--force]   a command hook with a test
+  new hook <Event> [--dir <dir>] [--force]
+                                         a command hook with a test
   new mod <name> [--dir <dir>] [--kit|--vendor-kit] [--force]
                                          a mod with a pane, a test and test helpers
   types [plugin-dir]                     copy Claude Code's mod types in, for CI type-checks
