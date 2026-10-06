@@ -16,6 +16,7 @@ conventions and release steps. This page is the map.
 | `src/adapter/` | command hook ↔ mod adapter (pure; vendored) |
 | `src/statusline/` | the statusline subpath |
 | `src/mod-testing/` | mod test helpers (vendored into tests) |
+| `src/scaffold/`, `src/doctor/`, `src/release/` | `plugin-kit new`, `doctor`, `release` |
 | `src/testing.ts` | the `/testing` subpath |
 | `plugin/` | the plugin-kit Claude Code plugin |
 | `plugin/hooks/kit/` | generated copies of the widget code; don't edit |
@@ -30,6 +31,7 @@ npm test             # unit tests, incl. stale plugin/hooks/kit and broken doc l
 npm run typecheck    # source, plus the $.kit contract against src/widgets
 npx tsc -p examples/tsconfig.json
 npm run plugin:check # claude plugin validate + claude plugin test (needs Claude Code)
+npm run hooktypes:check # our hook input types against Claude Code's own
 ```
 
 ## Changing widget code
@@ -61,10 +63,20 @@ links to repository files are full GitHub URLs, so they work in both places.
 
 ## Releasing
 
-Follow "Release" in `CLAUDE.md`: bump the version, move the CHANGELOG's
-`[Unreleased]` entries, commit `Release x.y.z`, tag `vx.y.z` (annotated) and
-push with `--follow-tags`. The tag runs the release workflow, which
-publishes to npm through trusted publishing and creates the GitHub release
-from the CHANGELOG. If `plugin/` changed, also
-update plugin-kit's `ref` and `sha` in the `aeriondyseti-plugins`
-marketplace.
+Follow "Release" in `CLAUDE.md`. The repo releases itself with its own
+[`plugin-kit release`](Tooling.md#release-plugin-kit-release) (version bump,
+CHANGELOG, commit, annotated tag, and the marketplace pin when `plugin/`
+changed); pushing the tag runs the release workflow, which publishes to npm
+through trusted publishing and creates the GitHub release from the
+CHANGELOG.
+
+## When Claude Code changes its hooks
+
+```bash
+npm run hooktypes:check            # against the newest declarations on this machine
+npm run hooktypes:check -- <path>  # or a given claude-code.d.ts
+```
+
+compares every event's input in `src/events/` with Claude Code's own
+declarations and lists events and fields we lack (exit 1). Add them by
+hand: the hand-written types keep narrower unions and docs.

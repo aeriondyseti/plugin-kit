@@ -6,9 +6,11 @@ scheduled — open an issue if you want to push any of these up the stack.
 ## Widgets and plugin-kit
 
 Shipped: widgets, `$.kit.render/line/parse/catalog`, kit-owned list
-folding, the marketplace, `add-kit`, user settings, `appendWidgets`, and
-the rename to `@aeriondyseti/plugin-kit` (2.0.0).
-Next, in order:
+folding, the marketplace, `add-kit`, user settings, `appendWidgets`, the
+rename to `@aeriondyseti/plugin-kit` (2.0.0), fixtures, the hook adapter,
+the status line, mod test helpers (2.2.0), and `new`, `doctor`, `types`,
+`release` and `hooktypes:check`.
+Next:
 
 ### More kit-owned interactions
 
@@ -17,46 +19,26 @@ Buttons need `onPress`; extend `hydrate` and add the first widgets that use
 them. Later types from the roleplay spec: `sparkline` (needs history),
 `portrait`.
 
-### Generate event input types from Claude Code's own declarations
-
-Claude Code writes the classic hook inputs into every mod's
-`.claude-plugin/types/claude-code/index.d.ts`. A script that extracts them
-per release would replace the hand sync (see TECH-DEBT). Typing that
-tracks Claude Code's version is the main draw of the closest competitor
-(cc-hooks-ts); automating it keeps us level without the chore. Once
-extracted, the same declarations could be published for mods to
-type-check in CI, where Claude Code isn't installed.
-
 ## Developer tooling
 
-From the October 2026 market scan: gaps no other tool fills, or chores we
-hit ourselves.
+### `hooktypes:check` in CI
 
-### `plugin-kit doctor`
+The drift check needs Claude Code's declarations, which only a machine
+with Claude Code has. A scheduled job that installs Claude Code, loads a
+throwaway mod to lay them, and runs the check would flag a new Claude Code
+release's hook changes without anyone running it by hand.
 
-Check a plugin for what `claude plugin validate` reports late or opaquely:
-`$` stored or passed to a function, a function returned through a plugin
-noun, a `Button` without `onPress`, a mod tsconfig without
-`allowImportingTsExtensions`, a dependency not in an allowlisted
-marketplace, stale vendored kit copies. On Windows, show exactly how a
-command hook will be launched (shell, resolved executable, argv), the most
-reported hook bug there.
+### `doctor --fix`
 
-### Plugin release helper
+Most findings have a mechanical fix (refresh a vendored copy, add
+`allowImportingTsExtensions`, name the kit's marketplace). Apply them on
+request.
 
-`plugin-kit release <patch|minor|major>`: bump `package.json` and/or
-`plugin.json`, move the CHANGELOG's `[Unreleased]`, commit, tag, and open a
-PR moving the marketplace entry's `ref`/`sha` (or rewrite a local
-`marketplace.json`). Nothing in the ecosystem does this, and it's a manual
-step in our own release.
+### `release` opening the marketplace PR
 
-### Scaffolding
-
-`plugin-kit new hook <Event>` (script, `handle()`, a test, settings
-snippet) and `plugin-kit new mod <name>` (manifest, `hooks.json`,
-`register.tsx`, tsconfig, a `claude plugin test` file, optional kit). Lower
-value than the rest: templates already exist (claude-code-plugin-template,
-tsuba), but ours would wire in the kit, fixtures and test helpers.
+`--marketplace` edits a local checkout of the marketplace. Opening the pin
+change as a PR on the marketplace's repo (with `gh`) would make it one step
+for a marketplace that isn't checked out.
 
 ## OutputBuilder
 

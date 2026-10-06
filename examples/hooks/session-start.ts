@@ -15,6 +15,7 @@
  * In a real project, replace the relative import with:
  *   import { runHook, SessionStart, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
+import { pathToFileURL } from 'node:url';
 import { ICONS, OutputBuilder, runHook, SessionStart } from '../../src/index.js';
 
 export function buildContext(input: ReturnType<typeof SessionStart.parse>): string {
@@ -38,6 +39,6 @@ export function handle(input: ReturnType<typeof SessionStart.parse>): void {
     });
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     runHook(() => handle(SessionStart.parse()));
 }

@@ -29,6 +29,7 @@ also in [`docs/`](docs/Home.md). This README is the quick tour.
 | Hook logic in a **mod**, or moved there from a script | the adapter (`vendor adapter`) | [Hooks in mods](#hooks-in-mods) |
 | A **status line** | `plugin-kit statusline`, or `/statusline` | [Status line](#status-line) |
 | Tests from **real sessions** | `plugin-kit record`, `run`, `fixtures`; `vendor testing` for mods | [Fixtures and mod tests](#fixtures-and-mod-tests) |
+| A **new** hook or mod, a **check**, **CI types**, a **release** | `plugin-kit new`, `doctor`, `types`, `release` | [Tooling](#tooling) |
 
 ## Install
 
@@ -339,6 +340,18 @@ thrown `HookParseError`:
 ```ts
 expect(() => testHook(wrongEvent, () => PreToolUse.parse())).toThrow(HookParseError);
 ```
+
+## Tooling
+
+```bash
+npx @aeriondyseti/plugin-kit new hook PreToolUse   # a hook + test + settings entry
+npx @aeriondyseti/plugin-kit new mod my-mod --kit  # a mod that validates and passes its tests
+npx @aeriondyseti/plugin-kit doctor                # what will break it, and the fix
+npx @aeriondyseti/plugin-kit types                 # Claude Code's mod types, for CI tsc
+npx @aeriondyseti/plugin-kit release minor         # bump, CHANGELOG, commit, tag (never pushes)
+```
+
+See [Tooling](docs/Tooling.md).
 
 ## Fixtures and mod tests
 

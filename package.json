@@ -73,7 +73,8 @@
         "plugin:check": "claude plugin validate plugin && claude plugin test plugin",
         "docs:wiki": "node scripts/sync-wiki.mjs",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "hooktypes:check": "node scripts/hook-types-drift.mjs"
     },
     "dependencies": {
         "string-width": "^7.2.0"

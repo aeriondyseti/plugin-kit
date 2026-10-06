@@ -4,15 +4,21 @@
  * work itself lives in the modules beside this one, where it's tested.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fixturesModule, loadFixture, loadFixtures, recordFixture, type Fixture } from '../fixtures.js';
 import { addKit, VENDOR_TARGETS, vendorFiles, type VendorTarget } from './addKit.js';
 import { composeStatusLine, DEFAULT_STATUS_LINE, parseStatusLineConfig } from '../statusline/compose.js';
 import { parseStatusLine, type StatusLineInput } from '../statusline/input.js';
 import { SOURCES } from '../statusline/sources.js';
+import { applyRelease, describePlan, planRelease } from '../release/run.js';
+import { diagnose, formatFindings } from '../doctor/run.js';
+import { CI_TSCONFIG, CI_TYPES, copyEngineTypes } from './types.js';
+import { hookFiles, hookSettings, isHookEvent, kebab, modFiles, type FileMap, type KitMode } from '../scaffold/templates.js';
+import { HOOK_EVENT_NAMES } from '../common.js';
 import { formatResults, runFixtures } from './run.js';
 
 const USAGE = `usage: plugin-kit <command>
@@ -26,7 +32,15 @@ const USAGE = `usage: plugin-kit <command>
   fixtures <dir> [--out <file.ts>]       fixtures as a TS module, for mod tests
   statusline [--config <file>]           a status line command (settings.json "statusLine")
   statusline --check [--config <file>]   preview a config and list its problems
-  statusline --list                      the sources a config can use`;
+  statusline --list                      the sources a config can use
+  new hook <Event> [--dir <dir>] [--force]
+                                         a command hook with a test
+  new mod <name> [--dir <dir>] [--kit|--vendor-kit] [--force]
+                                         a mod with a pane, a test and test helpers
+  types [plugin-dir]                     copy Claude Code's mod types in, for CI type-checks
+  doctor [dir] [--json] [--no-validate]  check a plugin (or a project's settings hooks) for what breaks it
+  release <patch|minor|major|x.y.z> [--plugin <dir>] [--marketplace <file>] [--dry-run]
+                                         bump, cut the CHANGELOG, commit and tag (never pushes)`;
 
 type Args = { positional: string[]; flags: Map<string, string | true> };
 
@@ -105,6 +119,87 @@ Then draw:
         return 0;
     },
 
+    new: ({ positional, flags }) => {
+        const [kind, name] = positional;
+        const force = flags.has('force');
+        const dirFlag = typeof flags.get('dir') === 'string' ? (flags.get('dir') as string) : undefined;
+        if (kind === 'hook') {
+            if (!name || !isHookEvent(name)) throw new UsageError(`new hook needs an event: one of ${HOOK_EVENT_NAMES.join(', ')}`);
+            const dir = dirFlag ?? join('.claude', 'hooks');
+            const written = writeNew(resolve(dir), hookFiles(name), force);
+            for (const file of written) console.log(`✓ ${join(dir, file)}`);
+            const script = `${dir.replaceAll('\\', '/')}/${kebab(name)}.ts`;
+            console.log(`\nAdd to settings.json (the command needs Node 22.18+ for .ts):\n${hookSettings(name, `node "$CLAUDE_PROJECT_DIR"/${script}`)}`);
+            console.log(`\nThen: npm i -D @aeriondyseti/plugin-kit vitest, and record real payloads with \`plugin-kit record\`.`);
+            return 0;
+        }
+        if (kind === 'mod') {
+            if (!name || !/^[a-z0-9][a-z0-9-]*$/.test(name)) throw new UsageError('new mod needs a name: lowercase letters, digits and dashes');
+            const mode: KitMode = flags.has('kit') ? 'kit' : flags.has('vendor-kit') ? 'vendor' : 'none';
+            const root = resolve(dirFlag ?? '.', name);
+            for (const file of writeNew(root, modFiles(name, mode, gitUserName()), force)) console.log(`✓ ${name}/${file}`);
+            vendorFiles(root, 'testing', vendorSources('testing'));
+            console.log(`✓ ${name}/tests/kit-testing/`);
+            if (mode === 'vendor') {
+                vendorFiles(root, 'kit', vendorSources('kit'));
+                console.log(`✓ ${name}/hooks/kit/`);
+            }
+            if (mode === 'kit') {
+                addKit(root, readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8'));
+                console.log(`✓ ${name}/hooks/hydrate.ts, and a dependency on plugin-kit@aeriondyseti-plugins`);
+            }
+            console.log(`\nNext:\n  claude plugin validate ${name}\n  claude plugin test ${name}\n  claude --plugin-dir ${name}    # then /${name}`);
+            return 0;
+        }
+        throw new UsageError('new needs "hook <Event>" or "mod <name>"');
+    },
+
+    types: ({ positional }) => {
+        const dir = resolve(positional[0] ?? '.');
+        const result = copyEngineTypes(dir);
+        console.log(`✓ ${CI_TYPES}/ (${result.version})`);
+        if (result.tsconfigWritten) console.log(`✓ ${CI_TSCONFIG}`);
+        console.log(`\nCommit both; in CI: npx tsc -p ${CI_TSCONFIG}\nRe-run after Claude Code updates to pick up its new declarations.`);
+        return 0;
+    },
+
+    doctor: ({ positional, flags }) => {
+        const findings = diagnose(positional[0] ?? '.', {
+            vendorSources,
+            hydrateSource: readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8'),
+            ...(flags.has('no-validate') ? { validate: false } : {}),
+        });
+        console.log(flags.has('json') ? JSON.stringify(findings, null, 2) : formatFindings(findings));
+        return findings.some((f) => f.level === 'error') ? 1 : 0;
+    },
+
+    release: ({ positional, flags }) => {
+        const bump = positional[0];
+        if (!bump) throw new UsageError('release needs patch, minor, major or a x.y.z version');
+        const str = (name: string) => (typeof flags.get(name) === 'string' ? (flags.get(name) as string) : undefined);
+        const root = process.cwd();
+        const plugin = str('plugin');
+        const marketplace = str('marketplace');
+        const marketplaceName = str('marketplace-name');
+        const date = str('date');
+        const plan = planRelease({
+            root,
+            bump,
+            ...(plugin ? { plugin } : {}),
+            ...(marketplace ? { marketplace } : {}),
+            ...(marketplaceName ? { marketplaceName } : {}),
+            ...(date ? { date } : {}),
+        });
+        console.log(describePlan(plan, root));
+        if (flags.has('dry-run')) {
+            console.log('\n(dry run: nothing written)');
+            return 0;
+        }
+        for (const line of applyRelease(plan, root)) console.log(`✓ ${line}`);
+        console.log(`\nNext: git push origin ${plan.branch} --follow-tags`);
+        return 0;
+    },
+
     fixtures: ({ positional, flags }) => {
         const dir = positional[0];
         if (!dir) throw new UsageError('fixtures needs the folder of recorded fixtures');
@@ -133,18 +228,41 @@ const VENDOR_USE: Record<VendorTarget, string> = {
   const ui = await $.ui.mount(mountTarget('my-plugin', 'AbovePrompt', surface))`,
 };
 
-function vendor(target: VendorTarget, dir = '.'): number {
-    const sources: Record<string, string> = {};
-    if (target === 'kit') {
-        const kitDir = shipped('plugin/hooks/kit');
-        for (const name of readdirSync(kitDir)) sources[name] = readFileSync(join(kitDir, name), 'utf8');
-        sources['hydrate.ts'] = readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8');
-    } else {
-        sources['index.ts'] = readFileSync(shipped(target === 'adapter' ? 'src/adapter/index.ts' : 'src/mod-testing/index.ts'), 'utf8');
+/** This version's copy of what `vendor <target>` writes, file name → text. */
+function vendorSources(target: VendorTarget): Record<string, string> {
+    if (target !== 'kit') {
+        return { 'index.ts': readFileSync(shipped(target === 'adapter' ? 'src/adapter/index.ts' : 'src/mod-testing/index.ts'), 'utf8') };
     }
-    const result = vendorFiles(resolve(dir), target, sources);
+    const kitDir = shipped('plugin/hooks/kit');
+    const sources: Record<string, string> = { 'hydrate.ts': readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8') };
+    for (const name of readdirSync(kitDir)) sources[name] = readFileSync(join(kitDir, name), 'utf8');
+    return sources;
+}
+
+function vendor(target: VendorTarget, dir = '.'): number {
+    const result = vendorFiles(resolve(dir), target, vendorSources(target));
     console.log(`✓ ${result.folder}/: ${result.written} written, ${result.unchanged} unchanged\n\n${VENDOR_USE[target]}`);
     return 0;
+}
+
+/** `git config user.name`, for a generated manifest's author; undefined if unset. */
+function gitUserName(): string | undefined {
+    try {
+        return execFileSync('git', ['config', 'user.name'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+/** Writes generated files under `dir`; refuses to overwrite one unless `force`. */
+function writeNew(dir: string, files: FileMap, force: boolean): string[] {
+    const clashes = Object.keys(files).filter((path) => existsSync(join(dir, path)));
+    if (clashes.length && !force) throw new Error(`would overwrite ${clashes.join(', ')} in ${dir}; pass --force to replace them`);
+    for (const [path, text] of Object.entries(files)) {
+        mkdirSync(dirname(join(dir, path)), { recursive: true });
+        writeFileSync(join(dir, path), text);
+    }
+    return Object.keys(files);
 }
 
 /** The config to use: `--config`, else the project's, else the user's, else the default. */
@@ -194,7 +312,7 @@ class UsageError extends Error {}
 function parseArgs(argv: string[]): Args {
     const positional: string[] = [];
     const flags = new Map<string, string | true>();
-    const valued = new Set(['out', 'event', 'config']);
+    const valued = new Set(['out', 'event', 'config', 'plugin', 'marketplace', 'marketplace-name', 'date', 'dir']);
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i]!;
         if (!arg.startsWith('--')) {

@@ -22,5 +22,6 @@
 - [Fixtures](Fixtures.md)
 
 **More**
+- [Tooling](Tooling.md)
 - [CLI](CLI.md)
 - [Contributing](Contributing.md)

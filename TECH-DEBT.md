@@ -46,8 +46,14 @@ it" from "nobody looked at this."
   `OpenUnion` so new values don't break parsing. Closed enums
   (`SessionStart.source`, `SessionEnd.reason`, ...) will silently fall
   behind when Claude Code adds a value.
-- **Revisit when:** a Claude Code release notes a hook change, or Anthropic
-  publishes an official schema package (then generate from it).
+- **Checked, not generated:** `npm run hooktypes:check` compares every
+  event's input with the declarations Claude Code writes for mods and lists
+  events and fields we lack (exit 1); clean against 2.1.290 and 2.1.291.
+  Generating the types instead would lose our narrower unions and docs
+  (`PermissionMode`, `NotificationType`), and those declarations come with
+  Claude Code rather than a package, so the sync stays a reviewed edit.
+- **Revisit when:** `hooktypes:check` reports drift, or Anthropic publishes
+  an official schema package (then generate from it).
 
 ## Implementation shortcuts
 

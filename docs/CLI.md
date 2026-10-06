@@ -18,6 +18,11 @@ The package installs a `plugin-kit` command. Run it with
 | `statusline [--config <file>]` | as a `statusLine` command: draw the status line | [Status Line](Status-Line.md) |
 | `statusline --check [--config <file>]` | preview a config, list its problems | [Status Line](Status-Line.md#configuring-it) |
 | `statusline --list` | the sources a config can use | [Status Line](Status-Line.md#sources) |
+| `new hook <Event> [--dir <dir>] [--force]` | a command hook with a test, and its settings entry | [Tooling](Tooling.md#start-plugin-kit-new) |
+| `new mod <name> [--kit\|--vendor-kit] [--dir <dir>] [--force]` | a mod that validates and passes its tests | [Tooling](Tooling.md#start-plugin-kit-new) |
+| `doctor [dir] [--json] [--no-validate]` | check a plugin or a project's hooks for what breaks them | [Tooling](Tooling.md#check-plugin-kit-doctor) |
+| `types [plugin-dir]` | copy Claude Code's mod types in, for CI type-checks | [Tooling](Tooling.md#type-check-in-ci-plugin-kit-types) |
+| `release <patch\|minor\|major\|x.y.z> [--plugin <dir>] [--marketplace <file>] [--dry-run]` | bump, cut the CHANGELOG, commit and tag; never pushes | [Tooling](Tooling.md#release-plugin-kit-release) |
 
 `plugin-dir` defaults to the current folder. Every `vendor` and `add-kit`
 run is safe to repeat: files already current are left alone, and re-running

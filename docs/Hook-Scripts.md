@@ -89,12 +89,19 @@ Any other error is re-thrown, so real bugs still crash with a stack trace
 Put the decision in a pure function and keep `parse`/`emit` at the edge:
 
 ```ts
+import { pathToFileURL } from 'node:url';
+
 export function handle(input: PreToolUseInput): PreToolUseEmitOptions { /* ... */ }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Runs only when executed, not when a test imports `handle`.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     runHook(() => PreToolUse.emitOutput(handle(PreToolUse.parse())));
 }
 ```
+
+Compare through `pathToFileURL`: a hand-built `` `file://${process.argv[1]}` ``
+never matches on Windows, so the hook would silently do nothing.
+`plugin-kit new hook <Event>` writes this shape for you.
 
 The [examples](https://github.com/aeriondyseti/plugin-kit/tree/main/examples/hooks)
 all follow this shape; [Testing](Testing.md) shows both ways to test it.

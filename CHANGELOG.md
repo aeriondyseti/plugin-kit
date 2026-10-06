@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `plugin-kit new hook <Event>`: a command hook with a pure `handle()`, a
+  run guard and a test, plus its `settings.json` entry; templates for all
+  33 events. `plugin-kit new mod <name> [--kit|--vendor-kit]`: a mod whose
+  slash command opens a pane, with a tsconfig, test helpers and a passing
+  `claude plugin test`.
+- `plugin-kit doctor [dir]`: checks a plugin, or a project's settings
+  hooks, for what breaks it (dynamic and npm imports, a noun of `$` used as
+  a value, a `Button` without `onPress`, tsconfig, the kit dependency,
+  stale vendored copies, and how each command hook launches), with
+  `claude plugin validate` folded in.
+- `plugin-kit types`: copies the declarations Claude Code writes for a mod
+  into `.claude-ci/types/` with a `tsconfig.ci.json`, so CI can type-check
+  it.
+- `plugin-kit release <patch|minor|major|x.y.z>`: bumps versions, cuts the
+  CHANGELOG, commits and tags, and pins a marketplace entry; never pushes.
+- `npm run hooktypes:check` (for maintainers): compares the hook input
+  types with Claude Code's own declarations.
+- Docs: a Tooling page.
+
+### Fixed
+
+- The example hooks' "run when executed" guard compared `import.meta.url`
+  with a hand-built `file://` URL, which never matches on Windows; they use
+  `pathToFileURL`.
+
 ## [2.2.0] - 2026-10-06
 
 Fixtures, hooks in mods, the status line, and mod test helpers.
