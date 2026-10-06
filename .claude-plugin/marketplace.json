@@ -1,0 +1,15 @@
+{
+    "name": "plugin-kit",
+    "owner": { "name": "Aerion Dyseti" },
+    "metadata": {
+        "description": "plugin-kit: shared widgets for Claude Code mods."
+    },
+    "plugins": [
+        {
+            "name": "plugin-kit",
+            "source": "./plugin",
+            "description": "Shared widgets for Claude Code mods: other plugins hand $.kit their state and draw what it returns.",
+            "category": "development"
+        }
+    ]
+}
