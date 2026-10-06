@@ -6,7 +6,8 @@ scheduled — open an issue if you want to push any of these up the stack.
 ## Widgets and plugin-kit
 
 Shipped: widgets, `$.kit.render/line/parse/catalog`, kit-owned list
-folding, the marketplace, `add-kit`, user settings, `appendWidgets`.
+folding, the marketplace, `add-kit`, user settings, `appendWidgets`, and
+the rename to `@aeriondyseti/plugin-kit` (2.0.0).
 Next, in order:
 
 ### Status line composition
@@ -27,10 +28,6 @@ them. Later types from the roleplay spec: `sparkline` (needs history),
 Claude Code writes the classic hook inputs into every mod's
 `.claude-plugin/types/claude-code/index.d.ts`. A script that extracts them
 per release would replace the hand sync (see TECH-DEBT).
-
-### Rename to plugin-kit
-
-The package's centre of gravity is moving from hook scripts to mods.
 
 ## OutputBuilder
 

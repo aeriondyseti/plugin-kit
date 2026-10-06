@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-10-06
+
+The first release published by the release workflow under the new name.
+
+### Changed
+
+- ROADMAP no longer lists the rename to plugin-kit as future work.
+
 ## [2.0.0] - 2026-10-06
 
 The package is renamed from `@aeriondyseti/hook-kit` to
@@ -162,7 +170,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.1
 [2.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.0
 [1.2.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.1
 [1.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.0
