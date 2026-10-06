@@ -5,13 +5,9 @@ scheduled — open an issue if you want to push any of these up the stack.
 
 ## Widgets and plugin-kit
 
-Phase 1 (widgets, `$.kit.render/line/parse/catalog`, kit-owned list
-folding) shipped. Next, in order:
-
-### `OutputBuilder.appendWidget`
-
-Draw a widget in hook output too (tags for color, the same bar and segment
-glyphs), so command hooks and mods show state the same way.
+Shipped: widgets, `$.kit.render/line/parse/catalog`, kit-owned list
+folding, the marketplace, `add-kit`, user settings, `appendWidgets`.
+Next, in order:
 
 ### Status line composition
 

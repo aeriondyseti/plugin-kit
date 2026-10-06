@@ -13,6 +13,9 @@ import { ICONS } from '../formatting/icons.js';
 import { renderTags, visualWidth } from '../formatting/tags.js';
 import { currentTheme, type Theme } from '../formatting/theme.js';
 import type { ColorName } from '../formatting/vocab.js';
+import { describeWidgets, type WidgetGlyphs } from '../widgets/describe.js';
+import type { Widget, Widgets } from '../widgets/types.js';
+import { toMarkup } from './widgetMarkup.js';
 
 export interface ListOptions {
     bullet?: string;
@@ -33,6 +36,12 @@ export interface BoxOptions {
 export interface TableOptions {
     headers?: readonly string[];
     color?: ColorName;
+}
+
+export interface WidgetOptions {
+    /** Cells in a meter's bar. Default 10. */
+    barWidth?: number;
+    glyphs?: WidgetGlyphs;
 }
 
 function detectWidth(): number {
@@ -184,6 +193,25 @@ export class OutputBuilder {
         for (const row of rows) this.appendLine(renderRow(row));
         this.appendLine(border('└', '┴', '┘'));
         return this;
+    }
+
+    /**
+     * Widgets, one row each, laid out as plugin-kit draws them in a mod:
+     *
+     *   Health ▰▰▰▰▰▰▰▱▱▱ 7/10
+     *   Suspicion ◆◆◇◇◇◇
+     *
+     * Lists are never folded (there is nothing to press), and a hex color
+     * is dropped (tags know the named colors only).
+     */
+    appendWidgets(widgets: Widgets, opts: WidgetOptions = {}): this {
+        const tree = describeWidgets(widgets, { id: 'output', listLimit: Infinity, ...opts });
+        for (const line of toMarkup(tree)) this.appendLine(line);
+        return this;
+    }
+
+    appendWidget(name: string, widget: Widget, opts: WidgetOptions = {}): this {
+        return this.appendWidgets({ [name]: widget }, opts);
     }
 
     render(theme: Theme = currentTheme()): string {

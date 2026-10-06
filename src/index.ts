@@ -57,6 +57,7 @@ export {
     type DividerOptions,
     type ListOptions,
     type TableOptions,
+    type WidgetOptions,
 } from './output/OutputBuilder.js';
 export { currentTheme, setTheme, type Theme } from './formatting/theme.js';
 export { renderTags, stripTags, visualWidth } from './formatting/tags.js';

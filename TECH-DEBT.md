@@ -122,3 +122,13 @@ it" from "nobody looked at this."
   (`claude --plugin-dir plugin`, then `npx tsc -p plugin`). CI has no
   Claude Code. `npm run plugin:check` validates and tests it locally.
 - **Revisit when:** Claude Code publishes its plugin types as a package.
+
+### Widget text in hook output isn't escaped
+
+- **Where:** `src/output/widgetMarkup.ts` (via `appendWidgets`)
+- **Why:** Widget names, values and notes go into tag markup as-is, like
+  `appendList` items do, so a value containing `<bold>` is styled rather
+  than shown. Tags have no escape syntax yet, and widget text comes from
+  the caller.
+- **Revisit when:** tags gain an escape, or widgets start carrying text a
+  caller doesn't control (e.g. straight from a model's tool call).
