@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `plugin/`: **plugin-kit**, a Claude Code plugin that adds `$.kit`
   (`render`, `line`, `parse`, `catalog`) to every mod that lists it under
   `dependencies`, and folds long lists behind a button it answers itself.
+- The repository is a marketplace named `plugin-kit`:
+  `claude plugin install plugin-kit@plugin-kit`.
+- `npx @aeriondyseti/hook-kit add-kit [plugin-dir]`: adds the plugin-kit
+  dependency to a plugin's `plugin.json` and copies `hydrate.ts` beside its
+  hooks module. Idempotent; re-run to refresh the copy.
+- plugin-kit settings (`userConfig`): `glyphs` (`unicode` / `ascii`),
+  `barWidth` and `listLimit`, applied to every plugin's drawings unless the
+  caller overrides them. `describeWidgets` takes the matching `glyphs`
+  option.
+- `OutputBuilder.appendWidget(name, widget)` / `appendWidgets(widgets)`:
+  widgets in hook output, laid out as plugin-kit draws them (lists never
+  fold; hex colors are dropped).
 
 ## [1.1.0] - 2026-09-27
 

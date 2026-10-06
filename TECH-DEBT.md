@@ -103,15 +103,16 @@ it" from "nobody looked at this."
 - **Revisit when:** Claude Code lets a mod import from a dependency, or
   lets a contract import types.
 
-### `hydrate` is copied by hand into each consumer
+### `hydrate` is copied into each consumer
 
-- **Where:** `src/widgets/hydrate.ts`, `plugin/README.md`
+- **Where:** `src/widgets/hydrate.ts`, `src/cli/addKit.ts`
 - **Why:** Functions can't cross between plugins, so the step that adds
   `onPress` closures has to run in the drawing plugin, and that plugin
-  can't import ours. The file is small and self-contained to make copying
-  safe. A vendoring command is on the ROADMAP.
-- **Revisit when:** the vendoring command ships, or Claude Code accepts a
-  Button without `onPress` (its `ui.press` hooks would then be enough).
+  can't import ours. `add-kit` writes the copy; a consumer whose copy is
+  older than its kit only refreshes it when someone re-runs `add-kit`.
+- **Revisit when:** Claude Code accepts a Button without `onPress` (its
+  `ui.press` hooks would then be enough), or a kit change needs a newer
+  `hydrate` (then `$.kit` should report the version it expects).
 
 ### The plugin has no typecheck in `npm run typecheck`
 
@@ -121,3 +122,13 @@ it" from "nobody looked at this."
   (`claude --plugin-dir plugin`, then `npx tsc -p plugin`). CI has no
   Claude Code. `npm run plugin:check` validates and tests it locally.
 - **Revisit when:** Claude Code publishes its plugin types as a package.
+
+### Widget text in hook output isn't escaped
+
+- **Where:** `src/output/widgetMarkup.ts` (via `appendWidgets`)
+- **Why:** Widget names, values and notes go into tag markup as-is, like
+  `appendList` items do, so a value containing `<bold>` is styled rather
+  than shown. Tags have no escape syntax yet, and widget text comes from
+  the caller.
+- **Revisit when:** tags gain an escape, or widgets start carrying text a
+  caller doesn't control (e.g. straight from a model's tool call).

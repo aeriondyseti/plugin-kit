@@ -17,19 +17,28 @@ import { loadWidgets, parseWidget } from './kit/parse.ts';
 
 const expanded = atom({ plugin: 'plugin-kit', key: 'expanded' } as const, {});
 
-export const register: Register = (on) => {
+export const register: Register = (on, options) => {
+    // The user's settings (userConfig), one look for every plugin using the
+    // kit. A caller's own arguments still win for its drawing.
+    const defaults = {
+        glyphs: options.glyphs === 'ascii' ? 'ascii' : 'unicode',
+        barWidth: typeof options.barWidth === 'number' ? options.barWidth : 10,
+        listLimit: typeof options.listLimit === 'number' ? options.listLimit : 5,
+    } as const;
+
     on('engine.create', async ($, e, next) => {
         // At engine.create `$` is empty; the methods reach the engine through
         // what `next` built, always spelled `built.<noun>.<method>(...)`.
         const built = await next(e);
         const kit: Kit = {
-            render: async ({ id, widgets, barWidth, listLimit }) => {
+            render: async ({ id, widgets, barWidth, listLimit, glyphs }) => {
                 const state = await built.state.get({ plugin: 'plugin-kit', key: 'expanded' } as const);
                 return describeWidgets(loadWidgets(widgets).widgets, {
                     id,
                     expanded: state.value?.[id] ?? [],
-                    ...(barWidth === undefined ? {} : { barWidth }),
-                    ...(listLimit === undefined ? {} : { listLimit }),
+                    barWidth: barWidth ?? defaults.barWidth,
+                    listLimit: listLimit ?? defaults.listLimit,
+                    glyphs: glyphs ?? defaults.glyphs,
                 });
             },
             line: async ({ widgets }) => renderWidgetsLine(loadWidgets(widgets).widgets),

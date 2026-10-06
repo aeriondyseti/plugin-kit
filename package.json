@@ -28,8 +28,12 @@
             "import": "./dist/widgets.js"
         }
     },
+    "bin": {
+        "hook-kit": "dist/cli.js"
+    },
     "files": [
         "dist",
+        "src/widgets/hydrate.ts",
         "examples",
         "README.md",
         "CHANGELOG.md",

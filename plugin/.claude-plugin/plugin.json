@@ -5,5 +5,26 @@
     "author": { "name": "Aerion Dyseti" },
     "repository": "https://github.com/aeriondyseti/hook-kit",
     "license": "MIT",
-    "types": "./types/index.d.ts"
+    "types": "./types/index.d.ts",
+    "userConfig": {
+        "glyphs": {
+            "type": "string",
+            "title": "Glyphs",
+            "description": "How widgets draw bars, segments and bullets in every plugin that uses the kit: unicode shapes, or plain ascii.",
+            "options": ["unicode", "ascii"],
+            "default": "unicode"
+        },
+        "barWidth": {
+            "type": "number",
+            "title": "Meter width",
+            "description": "Cells in a meter's bar, unless the plugin drawing it asks for another width.",
+            "default": 10
+        },
+        "listLimit": {
+            "type": "number",
+            "title": "List length",
+            "description": "Items a list shows before folding the rest behind a button, unless the plugin drawing it asks otherwise.",
+            "default": 5
+        }
+    }
 }

@@ -142,6 +142,17 @@ renderWidgetLine('Health', { type: 'meter', value: 88, max: 100 }); // 'Health 8
 widgetJsonSchema(); // a tool input schema whose descriptions are the catalog
 ```
 
+In hook output, `OutputBuilder` draws them as plugin-kit does in a mod:
+
+```ts
+new OutputBuilder().appendWidgets({
+    Health: { type: 'meter', value: 7, max: 10, color: 'red' },
+    Suspicion: { type: 'clock', value: 2, of: 6 },
+});
+// Health ▰▰▰▰▰▰▰▱▱▱ 7/10
+// Suspicion ◆◆◇◇◇◇
+```
+
 The subpath is pure (no Node, no dependencies). In a Claude Code mod, use
 the **plugin-kit** plugin in [`plugin/`](plugin) instead: depend on it and
 draw widgets through `$.kit`. Its README covers the setup.

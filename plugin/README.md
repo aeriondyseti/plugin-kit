@@ -4,24 +4,51 @@ A Claude Code plugin that gives every mod a `$.kit`: hand it widgets, draw
 what it returns. Plugins that use it look and behave the same, and the kit
 owns the small interactions (a long list folds behind `+3 more`).
 
+## Installing
+
+This repository is a marketplace named `plugin-kit`:
+
+```sh
+claude plugin marketplace add aeriondyseti/hook-kit
+claude plugin install plugin-kit@plugin-kit
+```
+
 ## Using it from your mod
 
 1. **Depend on it.** In your `.claude-plugin/plugin.json`:
 
    ```json
-   { "name": "my-mod", "dependencies": ["plugin-kit"] }
+   { "name": "my-mod", "dependencies": [{ "name": "plugin-kit", "marketplace": "plugin-kit" }] }
    ```
 
-   Claude Code then lays the kit's contract into your
-   `.claude-plugin/types/plugin-kit/`, so `$.kit` is typed. Without
-   plugin-kit installed your mod is not loaded, and the debug log says
-   `Dependency "plugin-kit" is not installed`.
+   A bare `"plugin-kit"` would be looked up in *your* plugin's marketplace,
+   so name ours. For installing your plugin to install the kit too, your
+   marketplace's `marketplace.json` must allow it:
 
-2. **Copy `hydrate`.** A mod can't import code from another plugin, and
+   ```json
+   { "name": "your-marketplace", "allowCrossMarketplaceDependenciesOn": ["plugin-kit"], ... }
+   ```
+
+   Without that line, your users install plugin-kit themselves first (the
+   allowlist doesn't apply to a dependency that is already installed);
+   otherwise your plugin installs but doesn't load, and `claude plugin list`
+   says `Dependency "plugin-kit@plugin-kit" is not installed`.
+
+   Claude Code lays the kit's contract into your
+   `.claude-plugin/types/plugin-kit/`, so `$.kit` is typed.
+
+   Steps 1 and 2 are one command, run in your plugin's folder:
+
+   ```sh
+   npx @aeriondyseti/hook-kit add-kit
+   ```
+
+2. **Get `hydrate`.** A mod can't import code from another plugin, and
    functions can't cross between plugins, so `$.kit.render` returns a plain
-   JSON description. Copy [`src/widgets/hydrate.ts`](../src/widgets/hydrate.ts)
-   (one self-contained file) into your `hooks/` folder. It builds the
-   elements and gives every Button its `onPress`.
+   JSON description. `add-kit` copies [`hydrate.ts`](../src/widgets/hydrate.ts)
+   (one self-contained file) beside your hooks module; run it again after
+   upgrading to refresh the copy. It builds the elements and gives every
+   Button its `onPress`.
 
 3. **Draw.**
 
@@ -50,7 +77,7 @@ owns the small interactions (a long list folds behind `+3 more`).
 
 | Method | Gives |
 | --- | --- |
-| `render({ id, widgets, barWidth?, listLimit? })` | A UI description of the widgets, for `hydrate`. Invalid widgets draw as text. |
+| `render({ id, widgets, barWidth?, listLimit?, glyphs? })` | A UI description of the widgets, for `hydrate`. Invalid widgets draw as text. |
 | `line({ widgets })` | One line of plain text, joined with ` · `: for a status line. |
 | `parse({ name, widget })` | `{ ok, widget }` or `{ ok: false, error }`, the error naming the widget and the fix. |
 | `catalog()` | `{ table, schema }`: the types as a markdown table for a prompt or skill, and a JSON Schema for one widget as a tool input. |
@@ -61,6 +88,20 @@ The widget types are documented in [`types/index.d.ts`](types/index.d.ts).
 
 Buttons you add to the tree get their handler by key:
 `hydrate(tree, h, { save: () => ... })`. Keys starting `kit:` are the kit's.
+
+### Settings
+
+The person using Claude Code sets plugin-kit's look once, for every plugin
+that draws through it, in `/config` (or `claude plugin configure plugin-kit`):
+
+| Setting | Default | |
+| --- | --- | --- |
+| `glyphs` | `unicode` | `ascii` draws bars as `###---`, clocks as `**..`, bullets as `-` |
+| `barWidth` | 10 | cells in a meter's bar |
+| `listLimit` | 5 | items a list shows before folding |
+
+A plugin that passes `barWidth`, `listLimit` or `glyphs` to `render`
+overrides them for its own drawing; most shouldn't.
 
 ### Restyling the kit
 

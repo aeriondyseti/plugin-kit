@@ -31,5 +31,6 @@ export {
     type UiNode,
     type UiProp,
     type WidgetAction,
+    type WidgetGlyphs,
 } from './describe.js';
 export { hydrate, type Factory } from './hydrate.js';

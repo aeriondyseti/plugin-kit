@@ -5,30 +5,15 @@ scheduled — open an issue if you want to push any of these up the stack.
 
 ## Widgets and plugin-kit
 
-Phase 1 (widgets, `$.kit.render/line/parse/catalog`, kit-owned list
-folding) shipped. Next, in order:
-
-### `OutputBuilder.appendWidget`
-
-Draw a widget in hook output too (tags for color, the same bar and segment
-glyphs), so command hooks and mods show state the same way.
-
-### Vendoring `hydrate`
-
-Consumers copy `src/widgets/hydrate.ts` by hand. A `npx … add-kit <plugin>`
-command that writes it (and adds the dependency to `plugin.json`) removes
-the step.
+Shipped: widgets, `$.kit.render/line/parse/catalog`, kit-owned list
+folding, the marketplace, `add-kit`, user settings, `appendWidgets`.
+Next, in order:
 
 ### Status line composition
 
 Lines of widgets bound to named sources (`session.context_pct`,
 `session.model`, usage) that plugins can add to. Claude Code's status-line
 JSON is a sibling of hook input; type it and compose from it.
-
-### Kit theming via `userConfig`
-
-Glyph style (unicode / ascii), bar width and list limit as plugin-kit
-options the user sets once for every plugin.
 
 ### More kit-owned interactions
 

@@ -24,6 +24,14 @@ export interface UiElement {
 /** What a Button in a description does when pressed. */
 export type WidgetAction = 'more' | 'less';
 
+/** Which characters draw bars, segments, bullets and separators. */
+export type WidgetGlyphs = 'unicode' | 'ascii';
+
+const GLYPHS: Record<WidgetGlyphs, { full: string; empty: string; on: string; off: string; bullet: string; dot: string }> = {
+    unicode: { full: '▰', empty: '▱', on: '◆', off: '◇', bullet: ICONS.bullet, dot: ICONS.dot },
+    ascii: { full: '#', empty: '-', on: '*', off: '.', bullet: '-', dot: '|' },
+};
+
 export interface DescribeOptions {
     /**
      * Names this drawing: it prefixes every Button key, so presses (and any
@@ -36,6 +44,8 @@ export interface DescribeOptions {
     listLimit?: number;
     /** Names of the lists drawn unfolded. */
     expanded?: readonly string[];
+    /** Default `unicode`; `ascii` for surfaces or fonts without the shapes. */
+    glyphs?: WidgetGlyphs;
 }
 
 const KEY_PREFIX = 'kit:';
@@ -72,6 +82,7 @@ function describeWidget(name: string, widget: Widget, opts: DescribeOptions): Ui
     const label = text(name, { bold: true, ...paint });
     const note = widget.note ? [text(widget.note, { dimColor: true, wrap: 'wrap' })] : [];
     const row = (...rest: UiNode[]) => box([label, ...rest], { flexDirection: 'row', gap: 1 });
+    const g = GLYPHS[opts.glyphs ?? 'unicode'];
 
     switch (widget.type) {
         case 'text':
@@ -80,15 +91,15 @@ function describeWidget(name: string, widget: Widget, opts: DescribeOptions): Ui
         case 'meter': {
             const cells = opts.barWidth ?? 10;
             const filled = Math.round((widget.value / widget.max) * cells);
-            const bar = '▰'.repeat(filled) + '▱'.repeat(cells - filled);
+            const bar = g.full.repeat(filled) + g.empty.repeat(cells - filled);
             return [row(text(bar, paint), text(`${widget.value}/${widget.max}`)), ...note];
         }
         case 'clock': {
-            const segments = '◆'.repeat(widget.value) + '◇'.repeat(widget.of - widget.value);
+            const segments = g.on.repeat(widget.value) + g.off.repeat(widget.of - widget.value);
             return [row(text(segments, paint)), ...note];
         }
         case 'tags':
-            return [row(text(widget.value.join(` ${ICONS.dot} `) || '(none)', paint)), ...note];
+            return [row(text(widget.value.join(` ${g.dot} `) || '(none)', paint)), ...note];
         case 'list':
             return [label, ...describeItems(name, widget.value, paint, opts), ...note];
     }
@@ -98,7 +109,8 @@ function describeItems(name: string, items: string[], paint: Record<string, UiPr
     const limit = opts.listLimit ?? 5;
     const isOpen = opts.expanded?.includes(name) ?? false;
     const shown = isOpen ? items : items.slice(0, limit);
-    const lines: UiNode[] = shown.map((item) => text(`  ${ICONS.bullet} ${item}`, paint));
+    const bullet = GLYPHS[opts.glyphs ?? 'unicode'].bullet;
+    const lines: UiNode[] = shown.map((item) => text(`  ${bullet} ${item}`, paint));
     if (items.length === 0) lines.push(text('  (none)', { dimColor: true }));
     if (items.length > limit) {
         const action = isOpen ? 'less' : 'more';

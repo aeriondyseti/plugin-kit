@@ -37,6 +37,9 @@ export interface KitUiElement {
     children?: KitUiNode[];
 }
 
+/** Which characters draw bars, segments, bullets and separators. */
+export type KitGlyphs = 'unicode' | 'ascii';
+
 export type KitParseResult = { ok: true; widget: KitWidget } | { ok: false; error: string };
 
 export type KitJson = string | number | boolean | null | KitJson[] | { [key: string]: KitJson };
@@ -52,10 +55,16 @@ export interface KitRenderArgs {
      * draws as text rather than failing the drawing (use `parse` to refuse).
      */
     widgets: { [name: string]: KitJson };
-    /** Cells in a meter's bar. Default 10. */
+    /**
+     * The three below override the user's plugin-kit settings for this
+     * drawing; leave them out to draw the way the user chose.
+     */
+    /** Cells in a meter's bar. The user's default, else 10. */
     barWidth?: number;
-    /** Items a list shows before folding the rest behind a button. Default 5. */
+    /** Items a list shows before folding the rest behind a button. The user's default, else 5. */
     listLimit?: number;
+    /** The user's default, else `unicode`. */
+    glyphs?: KitGlyphs;
 }
 
 export type Kit = {
