@@ -13,6 +13,7 @@ import { addKit, VENDOR_TARGETS, vendorFiles, type VendorTarget } from './addKit
 import { composeStatusLine, DEFAULT_STATUS_LINE, parseStatusLineConfig } from '../statusline/compose.js';
 import { parseStatusLine, type StatusLineInput } from '../statusline/input.js';
 import { SOURCES } from '../statusline/sources.js';
+import { applyRelease, describePlan, planRelease } from '../release/run.js';
 import { formatResults, runFixtures } from './run.js';
 
 const USAGE = `usage: plugin-kit <command>
@@ -26,7 +27,9 @@ const USAGE = `usage: plugin-kit <command>
   fixtures <dir> [--out <file.ts>]       fixtures as a TS module, for mod tests
   statusline [--config <file>]           a status line command (settings.json "statusLine")
   statusline --check [--config <file>]   preview a config and list its problems
-  statusline --list                      the sources a config can use`;
+  statusline --list                      the sources a config can use
+  release <patch|minor|major|x.y.z> [--plugin <dir>] [--marketplace <file>] [--dry-run]
+                                         bump, cut the CHANGELOG, commit and tag (never pushes)`;
 
 type Args = { positional: string[]; flags: Map<string, string | true> };
 
@@ -102,6 +105,33 @@ Then draw:
         } catch (err) {
             process.stdout.write(`plugin-kit statusline: ${err instanceof Error ? err.message : String(err)}\n`);
         }
+        return 0;
+    },
+
+    release: ({ positional, flags }) => {
+        const bump = positional[0];
+        if (!bump) throw new UsageError('release needs patch, minor, major or a x.y.z version');
+        const str = (name: string) => (typeof flags.get(name) === 'string' ? (flags.get(name) as string) : undefined);
+        const root = process.cwd();
+        const plugin = str('plugin');
+        const marketplace = str('marketplace');
+        const marketplaceName = str('marketplace-name');
+        const date = str('date');
+        const plan = planRelease({
+            root,
+            bump,
+            ...(plugin ? { plugin } : {}),
+            ...(marketplace ? { marketplace } : {}),
+            ...(marketplaceName ? { marketplaceName } : {}),
+            ...(date ? { date } : {}),
+        });
+        console.log(describePlan(plan, root));
+        if (flags.has('dry-run')) {
+            console.log('\n(dry run: nothing written)');
+            return 0;
+        }
+        for (const line of applyRelease(plan, root)) console.log(`✓ ${line}`);
+        console.log(`\nNext: git push origin ${plan.branch} --follow-tags`);
         return 0;
     },
 
@@ -194,7 +224,7 @@ class UsageError extends Error {}
 function parseArgs(argv: string[]): Args {
     const positional: string[] = [];
     const flags = new Map<string, string | true>();
-    const valued = new Set(['out', 'event', 'config']);
+    const valued = new Set(['out', 'event', 'config', 'plugin', 'marketplace', 'marketplace-name', 'date']);
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i]!;
         if (!arg.startsWith('--')) {
