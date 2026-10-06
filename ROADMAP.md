@@ -13,12 +13,6 @@ folding) shipped. Next, in order:
 Draw a widget in hook output too (tags for color, the same bar and segment
 glyphs), so command hooks and mods show state the same way.
 
-### Vendoring `hydrate`
-
-Consumers copy `src/widgets/hydrate.ts` by hand. A `npx … add-kit <plugin>`
-command that writes it (and adds the dependency to `plugin.json`) removes
-the step.
-
 ### Status line composition
 
 Lines of widgets bound to named sources (`session.context_pct`,

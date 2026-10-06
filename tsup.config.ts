@@ -5,6 +5,7 @@ export default defineConfig({
         index: 'src/index.ts',
         testing: 'src/testing.ts',
         widgets: 'src/widgets/index.ts',
+        cli: 'src/cli/main.ts',
     },
     format: ['esm'],
     dts: true,

@@ -37,11 +37,18 @@ claude plugin install plugin-kit@plugin-kit
    Claude Code lays the kit's contract into your
    `.claude-plugin/types/plugin-kit/`, so `$.kit` is typed.
 
-2. **Copy `hydrate`.** A mod can't import code from another plugin, and
+   Steps 1 and 2 are one command, run in your plugin's folder:
+
+   ```sh
+   npx @aeriondyseti/hook-kit add-kit
+   ```
+
+2. **Get `hydrate`.** A mod can't import code from another plugin, and
    functions can't cross between plugins, so `$.kit.render` returns a plain
-   JSON description. Copy [`src/widgets/hydrate.ts`](../src/widgets/hydrate.ts)
-   (one self-contained file) into your `hooks/` folder. It builds the
-   elements and gives every Button its `onPress`.
+   JSON description. `add-kit` copies [`hydrate.ts`](../src/widgets/hydrate.ts)
+   (one self-contained file) beside your hooks module; run it again after
+   upgrading to refresh the copy. It builds the elements and gives every
+   Button its `onPress`.
 
 3. **Draw.**
 
