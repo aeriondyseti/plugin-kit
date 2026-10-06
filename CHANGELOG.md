@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-06
+
+### Changed
+
+- The GitHub repository is now `aeriondyseti/plugin-kit`; the package's
+  `repository`, `homepage` and `bugs` URLs point there. The npm package
+  keeps its name, `@aeriondyseti/hook-kit`.
+
 ## [1.2.0] - 2026-10-06
 
 Widgets, and plugin-kit: a Claude Code plugin that draws them for mods.
@@ -132,7 +140,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.1
 [1.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.0
 [1.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.1.0
 [1.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.0.0
