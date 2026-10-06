@@ -109,6 +109,9 @@ Semver + [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 6. `git push origin main --follow-tags` (user runs this). The tag fires
    `.github/workflows/release.yml`, which re-runs the checks and publishes
    to npm via trusted publishing. Don't `npm publish` by hand.
+7. If `plugin/` changed, point plugin-kit's entry in the
+   `aeriondyseti-plugins` marketplace at the new tag: its `ref` and `sha`
+   (and `version`, if the plugin's own version moved).
 
 ## Memory and this file
 

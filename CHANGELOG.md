@@ -132,6 +132,7 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/hook-kit/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/aeriondyseti/hook-kit/releases/tag/v1.1.0
-[1.0.0]: https://github.com/aeriondyseti/hook-kit/releases/tag/v1.0.0
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.0
+[1.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.1.0
+[1.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.0.0
