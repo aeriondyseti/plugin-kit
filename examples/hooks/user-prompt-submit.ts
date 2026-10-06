@@ -7,7 +7,7 @@
  *   - `appendDivider` and `appendList` for simple section separators.
  *
  * In a real project, replace the relative import with:
- *   import { runHook, UserPromptSubmit, OutputBuilder, ICONS } from '@aeriondyseti/hook-kit';
+ *   import { runHook, UserPromptSubmit, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
 import { ICONS, OutputBuilder, runHook, UserPromptSubmit } from '../../src/index.js';
 

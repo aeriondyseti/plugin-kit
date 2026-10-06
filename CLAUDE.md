@@ -1,4 +1,4 @@
-# Working on hook-kit
+# Working on plugin-kit
 
 Guidance for future contributors — human or AI — about how this project is
 built. Short. Opinionated. Read it before you start.

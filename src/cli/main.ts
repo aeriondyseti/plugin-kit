@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * The `hook-kit` command. One subcommand today:
+ * The `plugin-kit` command. One subcommand today:
  *
- *   npx @aeriondyseti/hook-kit add-kit [plugin-dir]
+ *   npx @aeriondyseti/plugin-kit add-kit [plugin-dir]
  */
 
 import { readFileSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { addKit } from './addKit.js';
 
-const USAGE = 'usage: npx @aeriondyseti/hook-kit add-kit [plugin-dir]';
+const USAGE = 'usage: npx @aeriondyseti/plugin-kit add-kit [plugin-dir]';
 
 const [command, dir = '.'] = process.argv.slice(2);
 if (command !== 'add-kit') {

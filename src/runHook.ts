@@ -12,7 +12,7 @@
  * without giving up the flexibility of opting out:
  *
  *   // hooks/pre-tool-use.ts
- *   import { runHook, PreToolUse } from '@aeriondyseti/hook-kit';
+ *   import { runHook, PreToolUse } from '@aeriondyseti/plugin-kit';
  *
  *   runHook(() => {
  *     const input = PreToolUse.parse();

@@ -1,6 +1,6 @@
 # examples
 
-Dogfood hooks that use `hook-kit` itself. Each file demonstrates a different
+Dogfood hooks that use `plugin-kit` itself. Each file demonstrates a different
 slice of the library and ships with a colocated test.
 
 | Hook                                          | What it shows                                                                 |
@@ -35,5 +35,5 @@ The examples import from a relative path so the monorepo build works without
 import { runHook, PreToolUse } from '../../src/index.js';
 
 // your code would use this:
-import { runHook, PreToolUse } from '@aeriondyseti/hook-kit';
+import { runHook, PreToolUse } from '@aeriondyseti/plugin-kit';
 ```

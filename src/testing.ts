@@ -1,5 +1,5 @@
 /**
- * `hook-kit/testing` — drive an event's parse → emit flow against a synthetic
+ * `plugin-kit/testing` — drive an event's parse → emit flow against a synthetic
  * input, without touching real stdin/stdout or calling `process.exit`.
  *
  * The harness installs two seams that already exist in the library:

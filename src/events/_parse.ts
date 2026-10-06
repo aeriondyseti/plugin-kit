@@ -28,7 +28,7 @@ export type RawHookInput<N extends HookEventName> =
 export class HookParseError extends Error {
     readonly exitCode = 2 as const;
     constructor(public readonly parseError: string) {
-        super(`hook-kit: ${parseError}`);
+        super(`plugin-kit: ${parseError}`);
         this.name = 'HookParseError';
     }
 }

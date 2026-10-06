@@ -25,7 +25,7 @@ describe('runHook', () => {
             }),
         ).toThrow('__exit:2');
 
-        expect(stderr).toHaveBeenCalledWith('hook-kit: bad input\n');
+        expect(stderr).toHaveBeenCalledWith('plugin-kit: bad input\n');
         expect(exit).toHaveBeenCalledWith(2);
     });
 

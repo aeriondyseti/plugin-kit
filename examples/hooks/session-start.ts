@@ -13,7 +13,7 @@
  *   - `mockSessionStart` in the companion test.
  *
  * In a real project, replace the relative import with:
- *   import { runHook, SessionStart, OutputBuilder, ICONS } from '@aeriondyseti/hook-kit';
+ *   import { runHook, SessionStart, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
 import { ICONS, OutputBuilder, runHook, SessionStart } from '../../src/index.js';
 

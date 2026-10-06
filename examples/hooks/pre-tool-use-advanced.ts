@@ -14,7 +14,7 @@
  * Everything else is allowed.
  *
  * In a real project, replace the relative import with:
- *   import { runHook, PreToolUse } from '@aeriondyseti/hook-kit';
+ *   import { runHook, PreToolUse } from '@aeriondyseti/plugin-kit';
  */
 import { PreToolUse, runHook } from '../../src/index.js';
 

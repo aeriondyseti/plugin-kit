@@ -1,20 +1,24 @@
-# @aeriondyseti/hook-kit
+# @aeriondyseti/plugin-kit
 
-Ergonomic, typed helpers for writing [Claude Code](https://code.claude.com/docs/en/hooks) hook scripts.
-Covers all 33 hook events as of Claude Code 2.1.283.
+A typed toolkit for [Claude Code](https://code.claude.com/docs/en/hooks)
+plugins: hook scripts, styled output, and widgets that mods share through the
+[plugin-kit plugin](plugin). Covers all 33 hook events as of Claude Code
+2.1.283. Formerly `@aeriondyseti/hook-kit`.
 
 - One class per hook event with two static methods: `parse()` reads and
   validates stdin, `emitOutput()` writes the response JSON and exits.
 - A small `OutputBuilder` for styled multi-line text — boxes, tables, lists,
   dividers, icons, colors via tag markup.
-- A testing subpath (`@aeriondyseti/hook-kit/testing`) with `testHook`,
+- Widgets (`@aeriondyseti/plugin-kit/widgets`): meters, clocks, counters,
+  lists and tags, validated and drawn the same way in hook output and in mods.
+- A testing subpath (`@aeriondyseti/plugin-kit/testing`) with `testHook`,
   `mockXxx` input factories, and normalized result fields so you can assert
   `result.wasDenied` instead of spelunking the payload.
 
 ## Install
 
 ```bash
-npm install @aeriondyseti/hook-kit
+npm install @aeriondyseti/plugin-kit
 ```
 
 Requires Node 20+. ESM-only.
@@ -23,7 +27,7 @@ Requires Node 20+. ESM-only.
 
 ```ts
 #!/usr/bin/env node
-import { PreToolUse, runHook } from '@aeriondyseti/hook-kit';
+import { PreToolUse, runHook } from '@aeriondyseti/plugin-kit';
 
 runHook(() => {
     const input = PreToolUse.parse();
@@ -108,7 +112,7 @@ Each class's source file opens with a short note on when to reach for it.
 ## Styled output
 
 ```ts
-import { ICONS, OutputBuilder, PostToolUse } from '@aeriondyseti/hook-kit';
+import { ICONS, OutputBuilder, PostToolUse } from '@aeriondyseti/plugin-kit';
 
 const toUser = new OutputBuilder()
     .appendBox(`${ICONS.check} ${input.tool_name}`, { title: '● PostToolUse', color: 'green' })
@@ -133,7 +137,7 @@ Small, typed pieces of state — `text`, `counter`, `meter`, `clock`, `list`,
 `tags` — with validation a model can learn from, and two ways to draw them.
 
 ```ts
-import { parseWidget, renderWidgetLine, widgetJsonSchema } from '@aeriondyseti/hook-kit/widgets';
+import { parseWidget, renderWidgetLine, widgetJsonSchema } from '@aeriondyseti/plugin-kit/widgets';
 
 const parsed = parseWidget('Health', { type: 'meter', value: 88 });
 // { ok: false, error: 'Health: meter needs max: the value is drawn as a bar out of it' }
@@ -161,8 +165,8 @@ draw widgets through `$.kit`. Its README covers the setup.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { PreToolUse } from '@aeriondyseti/hook-kit';
-import { mockPreToolUse, testHook } from '@aeriondyseti/hook-kit/testing';
+import { PreToolUse } from '@aeriondyseti/plugin-kit';
+import { mockPreToolUse, testHook } from '@aeriondyseti/plugin-kit/testing';
 import { handle } from './pre-tool-use.js';
 
 it('denies rm -rf', () => {

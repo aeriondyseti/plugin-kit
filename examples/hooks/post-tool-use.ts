@@ -8,7 +8,7 @@
  *   - `toClaude` for feeding extra context back into Claude's next turn.
  *
  * In a real project, replace the relative import with:
- *   import { runHook, PostToolUse, OutputBuilder, ICONS } from '@aeriondyseti/hook-kit';
+ *   import { runHook, PostToolUse, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
 import { ICONS, OutputBuilder, PostToolUse, runHook } from '../../src/index.js';
 import { flatten } from './_flatten.js';

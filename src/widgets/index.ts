@@ -1,5 +1,5 @@
 /**
- * `@aeriondyseti/hook-kit/widgets` — typed widgets, their validation and
+ * `@aeriondyseti/plugin-kit/widgets` — typed widgets, their validation and
  * catalog, and the renderers: a one-line form and a UI description a mod
  * draws. Pure: no Node, no dependencies.
  */

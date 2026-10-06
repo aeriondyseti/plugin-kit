@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-06
+
+The package is renamed from `@aeriondyseti/hook-kit` to
+`@aeriondyseti/plugin-kit`, matching its repository and its Claude Code
+plugin. The code is the same as 1.2.1; `@aeriondyseti/hook-kit` is
+deprecated and gets no further releases.
+
+### Changed
+
+- **Breaking:** install and import `@aeriondyseti/plugin-kit` (and its
+  `/testing` and `/widgets` subpaths) instead of `@aeriondyseti/hook-kit`.
+- **Breaking:** the command is `plugin-kit`:
+  `npx @aeriondyseti/plugin-kit add-kit`.
+- Errors and `runHook`'s stderr messages are prefixed `plugin-kit:`
+  instead of `hook-kit:`.
+- The package description covers plugins and widgets, not only hook scripts.
+
+### Fixed
+
+- `add-kit` creates the `hooks/` folder for a plugin that has none yet,
+  instead of failing with `ENOENT`.
+
 ## [1.2.1] - 2026-10-06
 
 ### Changed
@@ -140,7 +162,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.0
 [1.2.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.1
 [1.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.2.0
 [1.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v1.1.0

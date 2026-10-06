@@ -11,7 +11,7 @@
  */
 import { writeSync } from 'node:fs';
 
-export const _CAPTURED_SENTINEL: unique symbol = Symbol('hook-kit:captured');
+export const _CAPTURED_SENTINEL: unique symbol = Symbol('plugin-kit:captured');
 
 export interface EmitCaptureSlot {
     payload?: unknown;

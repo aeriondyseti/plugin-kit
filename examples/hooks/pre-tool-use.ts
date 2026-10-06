@@ -8,7 +8,7 @@
  *   - `OutputBuilder` with icons, tags, box, and table.
  *
  * In a real project, replace the relative import with:
- *   import { runHook, PreToolUse, OutputBuilder, ICONS } from '@aeriondyseti/hook-kit';
+ *   import { runHook, PreToolUse, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
 import { ICONS, OutputBuilder, PreToolUse, runHook } from '../../src/index.js';
 import { flatten } from './_flatten.js';

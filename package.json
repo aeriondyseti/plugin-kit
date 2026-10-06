@@ -1,7 +1,7 @@
 {
-    "name": "@aeriondyseti/hook-kit",
-    "version": "1.2.1",
-    "description": "Ergonomic helpers for writing Claude Code hook scripts.",
+    "name": "@aeriondyseti/plugin-kit",
+    "version": "2.0.0",
+    "description": "Typed toolkit for Claude Code plugins: hook events, styled output, and shared widgets for mods via the plugin-kit plugin.",
     "type": "module",
     "repository": {
         "type": "git",
@@ -29,7 +29,7 @@
         }
     },
     "bin": {
-        "hook-kit": "dist/cli.js"
+        "plugin-kit": "dist/cli.js"
     },
     "files": [
         "dist",
@@ -47,7 +47,10 @@
         "hook",
         "hooks",
         "cli",
-        "anthropic"
+        "anthropic",
+        "plugin",
+        "mod",
+        "widgets"
     ],
     "engines": {
         "node": ">=20"

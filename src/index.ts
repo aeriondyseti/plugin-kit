@@ -1,5 +1,5 @@
 /**
- * `hook-kit` — typed helpers for writing Claude Code hook scripts.
+ * `plugin-kit` — typed helpers for writing Claude Code hook scripts.
  *
  * Every hook event ships as a class with two static methods:
  *

@@ -41,7 +41,7 @@ claude plugin install plugin-kit@aeriondyseti-plugins
    Steps 1 and 2 are one command, run in your plugin's folder:
 
    ```sh
-   npx @aeriondyseti/hook-kit add-kit
+   npx @aeriondyseti/plugin-kit add-kit
    ```
 
 2. **Get `hydrate`.** A mod can't import code from another plugin, and
