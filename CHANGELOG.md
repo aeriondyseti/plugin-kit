@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `npx @aeriondyseti/hook-kit add-kit [plugin-dir]`: adds the plugin-kit
   dependency to a plugin's `plugin.json` and copies `hydrate.ts` beside its
   hooks module. Idempotent; re-run to refresh the copy.
+- plugin-kit settings (`userConfig`): `glyphs` (`unicode` / `ascii`),
+  `barWidth` and `listLimit`, applied to every plugin's drawings unless the
+  caller overrides them. `describeWidgets` takes the matching `glyphs`
+  option.
 
 ## [1.1.0] - 2026-09-27
 

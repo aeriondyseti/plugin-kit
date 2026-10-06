@@ -39,6 +39,19 @@ describe('describeWidgets', () => {
         expect(texts(tree)).toEqual(['HP', '▰▰▰▰▰▰▰▱▱▱', '7/10', 'Doom', '◆◆◇◇']);
     });
 
+    it('draws with ascii glyphs when asked', () => {
+        const tree = describeWidgets(
+            {
+                HP: { type: 'meter', value: 7, max: 10 },
+                Doom: { type: 'clock', value: 2, of: 4 },
+                State: { type: 'tags', value: ['hurt', 'hunted'] },
+                Clues: { type: 'list', value: ['a'] },
+            },
+            { id: 'p', glyphs: 'ascii' },
+        );
+        expect(texts(tree)).toEqual(['HP', '#######---', '7/10', 'Doom', '**..', 'State', 'hurt | hunted', 'Clues', '  - a']);
+    });
+
     it('paints the main part with the color and keeps the note dim', () => {
         const tree = describeWidgets({ HP: { type: 'counter', value: 1, color: 'red', note: 'bleeding' } }, { id: 'p' });
         const [row, note] = tree.children as UiElement[];

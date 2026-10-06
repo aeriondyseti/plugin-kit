@@ -65,3 +65,18 @@ test('another plugin draws kit widgets and the kit folds its lists', { plugins: 
         await ui.unmount();
     }
 });
+
+test(
+    "the user's settings restyle every caller's widgets",
+    { plugins: [consumer], options: { glyphs: 'ascii', barWidth: 4, listLimit: 2 } },
+    async ($) => {
+        const ui = await $.ui.mount({ ...ABOVE, surface: 'terminal' });
+        const text = async (pattern: RegExp) => (await ui.find({ type: 'Text', text: pattern }))?.text;
+
+        expect(await text(/#/)).toBe('###-');
+        expect(await text(/- b/)).toBe('  - b');
+        expect(await text(/- c/)).toBeUndefined();
+        expect((await ui.find({ type: 'Button', key: 'kit:demo:Clues:more' }))?.text).toMatch(/\+5 more/);
+        await ui.unmount();
+    },
+);

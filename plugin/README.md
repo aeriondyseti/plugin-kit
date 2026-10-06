@@ -77,7 +77,7 @@ claude plugin install plugin-kit@plugin-kit
 
 | Method | Gives |
 | --- | --- |
-| `render({ id, widgets, barWidth?, listLimit? })` | A UI description of the widgets, for `hydrate`. Invalid widgets draw as text. |
+| `render({ id, widgets, barWidth?, listLimit?, glyphs? })` | A UI description of the widgets, for `hydrate`. Invalid widgets draw as text. |
 | `line({ widgets })` | One line of plain text, joined with ` · `: for a status line. |
 | `parse({ name, widget })` | `{ ok, widget }` or `{ ok: false, error }`, the error naming the widget and the fix. |
 | `catalog()` | `{ table, schema }`: the types as a markdown table for a prompt or skill, and a JSON Schema for one widget as a tool input. |
@@ -88,6 +88,20 @@ The widget types are documented in [`types/index.d.ts`](types/index.d.ts).
 
 Buttons you add to the tree get their handler by key:
 `hydrate(tree, h, { save: () => ... })`. Keys starting `kit:` are the kit's.
+
+### Settings
+
+The person using Claude Code sets plugin-kit's look once, for every plugin
+that draws through it, in `/config` (or `claude plugin configure plugin-kit`):
+
+| Setting | Default | |
+| --- | --- | --- |
+| `glyphs` | `unicode` | `ascii` draws bars as `###---`, clocks as `**..`, bullets as `-` |
+| `barWidth` | 10 | cells in a meter's bar |
+| `listLimit` | 5 | items a list shows before folding |
+
+A plugin that passes `barWidth`, `listLimit` or `glyphs` to `render`
+overrides them for its own drawing; most shouldn't.
 
 ### Restyling the kit
 

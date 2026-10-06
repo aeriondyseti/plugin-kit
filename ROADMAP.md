@@ -19,11 +19,6 @@ Lines of widgets bound to named sources (`session.context_pct`,
 `session.model`, usage) that plugins can add to. Claude Code's status-line
 JSON is a sibling of hook input; type it and compose from it.
 
-### Kit theming via `userConfig`
-
-Glyph style (unicode / ascii), bar width and list limit as plugin-kit
-options the user sets once for every plugin.
-
 ### More kit-owned interactions
 
 `Input` and `Select` need `onInput`/`onSelect` closures the same way
