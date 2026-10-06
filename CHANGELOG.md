@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Fixtures.** `plugin-kit record`, a command hook that saves each payload
+  Claude Code sends; `plugin-kit run <command> <fixtures>`, which replays
+  them through a real hook command and reports its decisions, exit codes
+  and timing; `loadFixture` / `loadFixtures` in `/testing`; and
+  `plugin-kit fixtures`, which turns them into a TS module for mod tests.
+  `summarizeOutput` (what a hook's JSON decided) is exported from
+  `/testing`.
+- **`@aeriondyseti/plugin-kit/adapter`**: run hook logic in a mod.
+  `toClassic(event, options)` turns a policy's emit options into a mod's
+  classic answer; `fromCommandOutput` runs an existing script unchanged via
+  `$.process.run`; `fromToolCall` and `toCommandInput` translate inputs.
+  Checked against every event class.
+- **`@aeriondyseti/plugin-kit/statusline`** and `plugin-kit statusline`:
+  typed status-line input, 25 sources, items drawn as widgets (meters with
+  bars and warn/alert colors), JSON configs checked with fixes named,
+  `--check` to preview, `--list` for sources. Never fails the status line.
+- **Mod test helpers** (`plugin-kit vendor testing`): `mountTarget` with
+  valid default props, `SURFACES`, `kitStub` (a stand-in for the plugin-kit
+  plugin) and `replay` / `replayAll` for recorded fixtures.
+- `plugin-kit vendor <kit|adapter|testing>` copies code into a plugin;
+  `add-kit --vendor` is `vendor kit`.
+- Docs: Fixtures, Hooks in Mods, Status Line and CLI pages.
+
 - Each release also gets a GitHub release, created by the release workflow
   with the version's CHANGELOG section as its notes
   (`scripts/release-notes.mjs`). Earlier versions were backfilled.

@@ -26,6 +26,9 @@ also in [`docs/`](docs/Home.md). This README is the quick tour.
 | A **mod** (a plugin with function hooks) that should look like other mods and follow the user's kit settings | the **plugin-kit plugin** through `$.kit` | [Widgets in a mod: `$.kit`](#widgets-in-a-mod-kit) |
 | A **mod** that must stand alone, with no plugin to install | the widget code **vendored** into your mod | [Widgets in a mod: vendored](#widgets-in-a-mod-vendored) |
 | Hook **typings** | hook scripts: this package; mods: Claude Code's own `claude-code` types | [Hook typings](#hook-typings) |
+| Hook logic in a **mod**, or moved there from a script | the adapter (`vendor adapter`) | [Hooks in mods](#hooks-in-mods) |
+| A **status line** | `plugin-kit statusline`, or `/statusline` | [Status line](#status-line) |
+| Tests from **real sessions** | `plugin-kit record`, `run`, `fixtures`; `vendor testing` for mods | [Fixtures and mod tests](#fixtures-and-mod-tests) |
 
 ## Install
 
@@ -336,6 +339,56 @@ thrown `HookParseError`:
 ```ts
 expect(() => testHook(wrongEvent, () => PreToolUse.parse())).toThrow(HookParseError);
 ```
+
+## Fixtures and mod tests
+
+Record what real sessions send, then replay it in seconds. Add
+`plugin-kit record` as a command hook (it saves each payload under
+`.claude/fixtures/<Event>/` and never changes what Claude does), then:
+
+```bash
+plugin-kit run "node .claude/hooks/pre-tool-use.ts" .claude/fixtures
+# ✓ .claude/fixtures/PreToolUse/20261006-145042-Bash.json  PreToolUse  denied  60ms
+#     to Claude: refused: rm -rf /
+```
+
+In unit tests, `loadFixtures(dir)` feeds `testHook`. For mods,
+`plugin-kit fixtures .claude/fixtures --out tests/fixtures.ts` makes them
+importable, and `plugin-kit vendor testing` adds helpers for
+`claude plugin test`: `mountTarget` (valid component props), `kitStub` (a
+stand-in for the plugin-kit plugin) and `replayAll($, fixtures)`. See
+[Fixtures](docs/Fixtures.md) and [Testing](docs/Testing.md).
+
+## Hooks in mods
+
+`@aeriondyseti/plugin-kit/adapter` runs hook logic written for scripts in a
+mod. Vendor it (`plugin-kit vendor adapter`), and one policy serves both:
+
+```ts
+// a policy: handle(input) => emit options, typed by this package
+on('classic.UserPromptSubmit', ($, e, next) => toClassic('UserPromptSubmit', guardPrompt(e)) ?? next(e));
+on('classic.PreToolUse', ($, e, next) => toClassic('PreToolUse', guardBash(fromToolCall(e))) ?? next(e));
+```
+
+`fromCommandOutput` runs an existing script unchanged through
+`$.process.run`. See [Hooks in Mods](docs/Hooks-in-Mods.md).
+
+## Status line
+
+```json
+{ "statusLine": { "type": "command", "command": "plugin-kit statusline" } }
+```
+
+```
+Opus 5.5 · plugin-kit · main · #42
+ctx ▰▰▰▰▰▰▰▱▱▱ 72% · 5h 38% · week 91% · $1.23 · +120 -34
+```
+
+Configure it in `.claude/statusline.json` from 25 sources (model, context,
+usage windows, cost, git, PR, cache, ...), each drawn as a widget with
+labels, colors and warn/alert thresholds; `plugin-kit statusline --check`
+previews and lints a config. In code, `composeStatusLine` takes your own
+sources too. See [Status Line](docs/Status-Line.md).
 
 ## Examples
 

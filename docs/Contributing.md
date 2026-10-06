@@ -11,7 +11,11 @@ conventions and release steps. This page is the map.
 | `src/events/` | one class per hook event |
 | `src/output/`, `src/formatting/` | `OutputBuilder`, tags, icons, theme |
 | `src/widgets/` | the widgets subpath (pure: no Node) |
-| `src/cli/` | the `plugin-kit` command (`add-kit`) |
+| `src/cli/` | the `plugin-kit` command |
+| `src/fixtures.ts` | fixture record and load |
+| `src/adapter/` | command hook ↔ mod adapter (pure; vendored) |
+| `src/statusline/` | the statusline subpath |
+| `src/mod-testing/` | mod test helpers (vendored into tests) |
 | `src/testing.ts` | the `/testing` subpath |
 | `plugin/` | the plugin-kit Claude Code plugin |
 | `plugin/hooks/kit/` | generated copies of the widget code; don't edit |
