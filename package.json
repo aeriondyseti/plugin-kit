@@ -22,6 +22,10 @@
         "./testing": {
             "types": "./dist/testing.d.ts",
             "import": "./dist/testing.js"
+        },
+        "./widgets": {
+            "types": "./dist/widgets.d.ts",
+            "import": "./dist/widgets.js"
         }
     },
     "files": [
@@ -46,7 +50,9 @@
     },
     "scripts": {
         "build": "tsup",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsc --noEmit && tsc -p tsconfig.contract.json",
+        "plugin:sync": "node scripts/sync-plugin.mjs",
+        "plugin:check": "claude plugin validate plugin && claude plugin test plugin",
         "test": "vitest run",
         "test:watch": "vitest"
     },

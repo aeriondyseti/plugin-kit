@@ -1,0 +1,9 @@
+{
+    "name": "plugin-kit",
+    "version": "0.1.0",
+    "description": "Shared widgets for Claude Code mods: other plugins hand $.kit their state and draw what it returns.",
+    "author": { "name": "Aerion Dyseti" },
+    "repository": "https://github.com/aeriondyseti/hook-kit",
+    "license": "MIT",
+    "types": "./types/index.d.ts"
+}

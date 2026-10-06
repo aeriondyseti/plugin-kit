@@ -3,6 +3,50 @@
 Ideas captured for a future release. Nothing here is committed or
 scheduled — open an issue if you want to push any of these up the stack.
 
+## Widgets and plugin-kit
+
+Phase 1 (widgets, `$.kit.render/line/parse/catalog`, kit-owned list
+folding) shipped. Next, in order:
+
+### `OutputBuilder.appendWidget`
+
+Draw a widget in hook output too (tags for color, the same bar and segment
+glyphs), so command hooks and mods show state the same way.
+
+### Vendoring `hydrate`
+
+Consumers copy `src/widgets/hydrate.ts` by hand. A `npx … add-kit <plugin>`
+command that writes it (and adds the dependency to `plugin.json`) removes
+the step.
+
+### Status line composition
+
+Lines of widgets bound to named sources (`session.context_pct`,
+`session.model`, usage) that plugins can add to. Claude Code's status-line
+JSON is a sibling of hook input; type it and compose from it.
+
+### Kit theming via `userConfig`
+
+Glyph style (unicode / ascii), bar width and list limit as plugin-kit
+options the user sets once for every plugin.
+
+### More kit-owned interactions
+
+`Input` and `Select` need `onInput`/`onSelect` closures the same way
+Buttons need `onPress`; extend `hydrate` and add the first widgets that use
+them. Later types from the roleplay spec: `sparkline` (needs history),
+`portrait`.
+
+### Generate event input types from Claude Code's own declarations
+
+Claude Code writes the classic hook inputs into every mod's
+`.claude-plugin/types/claude-code/index.d.ts`. A script that extracts them
+per release would replace the hand sync (see TECH-DEBT).
+
+### Rename to plugin-kit
+
+The package's centre of gravity is moving from hook scripts to mods.
+
 ## OutputBuilder
 
 ### Table alignment
