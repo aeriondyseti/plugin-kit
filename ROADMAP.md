@@ -118,6 +118,20 @@ dedicated helper might still be worth it.
 
 ## Documentation
 
+### API reference from the JSDoc
+
+`docs/` is hand-written guides; nothing lists every export with its
+signature. Generate an API reference from the JSDoc comments already on the
+public surface (e.g. TypeDoc with a markdown plugin), covering the three
+entry points (`.`, `/widgets`, `/testing`) and the `$.kit` contract in
+`plugin/types/index.d.ts`. Output it as markdown into `docs/` so
+`npm run docs:wiki` publishes it with the rest, linked from the sidebar.
+Regenerate it in a script (and check it's current in CI, as `plugin:sync`
+is), so it can't drift from the code. Expect to fill gaps first: some
+exports have thin or no JSDoc.
+
+### More
+
 - A dedicated doc on the hook protocol (exit codes, emit shapes,
   decision semantics) so library users don't have to cross-reference
   Claude Code's docs for every field.
