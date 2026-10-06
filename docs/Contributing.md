@@ -16,6 +16,7 @@ conventions and release steps. This page is the map.
 | `plugin/` | the plugin-kit Claude Code plugin |
 | `plugin/hooks/kit/` | generated copies of the widget code; don't edit |
 | `docs/` | these pages, published to the wiki |
+| `scripts/` | sync scripts (plugin copies, wiki), release notes |
 | `examples/hooks/` | runnable example hooks with tests |
 
 ## Checks
@@ -59,6 +60,7 @@ links to repository files are full GitHub URLs, so they work in both places.
 Follow "Release" in `CLAUDE.md`: bump the version, move the CHANGELOG's
 `[Unreleased]` entries, commit `Release x.y.z`, tag `vx.y.z` (annotated) and
 push with `--follow-tags`. The tag runs the release workflow, which
-publishes to npm through trusted publishing. If `plugin/` changed, also
+publishes to npm through trusted publishing and creates the GitHub release
+from the CHANGELOG. If `plugin/` changed, also
 update plugin-kit's `ref` and `sha` in the `aeriondyseti-plugins`
 marketplace.

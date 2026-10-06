@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Each release also gets a GitHub release, created by the release workflow
+  with the version's CHANGELOG section as its notes
+  (`scripts/release-notes.mjs`). Earlier versions were backfilled.
+
 ## [2.1.0] - 2026-10-06
 
 ### Added

@@ -107,8 +107,10 @@ Semver + [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
    Annotated, not lightweight: `--follow-tags` skips lightweight tags, and
    the tag push is what triggers the publish.
 6. `git push origin main --follow-tags` (user runs this). The tag fires
-   `.github/workflows/release.yml`, which re-runs the checks and publishes
-   to npm via trusted publishing. Don't `npm publish` by hand.
+   `.github/workflows/release.yml`, which re-runs the checks, publishes
+   to npm via trusted publishing, and creates the GitHub release from the
+   version's CHANGELOG section (so that section must exist). Don't
+   `npm publish` or `gh release create` by hand.
 7. If `plugin/` changed, point plugin-kit's entry in the
    `aeriondyseti-plugins` marketplace at the new tag: its `ref` and `sha`
    (and `version`, if the plugin's own version moved).
