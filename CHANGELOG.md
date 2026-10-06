@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-06
+
 ### Added
 
 - `plugin-kit new hook <Event>`: a command hook with a pure `handle()`, a
@@ -249,7 +251,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.3.0
 [2.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.2.0
 [2.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.1.0
 [2.0.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.1
