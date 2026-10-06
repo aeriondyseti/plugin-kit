@@ -6,7 +6,7 @@
  * folder. Pass the mod's JSX factory as `create`:
  *
  *   const tree = await $.kit.render({ id: e.requestId, widgets })
- *   return hydrate(tree, h, { save: () => ... })
+ *   return <Box>{hydrate(tree, h, { save: () => ... })}</Box>
  *
  * Every Button needs an `onPress` to draw, so each one gets either the
  * handler named by its key or a no-op. A no-op still raises `ui.press`,

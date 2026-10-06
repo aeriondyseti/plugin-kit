@@ -1,3 +1,5 @@
+// Generated from src/widgets/describe.ts by scripts/sync-plugin.mjs. Do not edit.
+
 /**
  * Widgets as a UI description: plain JSON shaped like the element trees
  * Claude Code's mods draw (`{ type: 'Text', props, children }`).
@@ -8,8 +10,8 @@
  * where every Button gets its `onPress`.
  */
 
-import { ICONS } from '../formatting/icons.js';
-import type { Widget, Widgets } from './types.js';
+import { ICONS } from './icons.ts';
+import type { Widget, Widgets } from './types.ts';
 
 export type UiProp = string | number | boolean;
 export type UiNode = string | UiElement;

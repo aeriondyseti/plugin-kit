@@ -50,7 +50,9 @@
     },
     "scripts": {
         "build": "tsup",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsc --noEmit && tsc -p tsconfig.contract.json",
+        "plugin:sync": "node scripts/sync-plugin.mjs",
+        "plugin:check": "claude plugin validate plugin && claude plugin test plugin",
         "test": "vitest run",
         "test:watch": "vitest"
     },

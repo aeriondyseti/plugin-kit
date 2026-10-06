@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `@aeriondyseti/hook-kit/widgets`: six widget types (`text`, `counter`,
+  `meter`, `clock`, `list`, `tags`) with `note`, `color` (named or hex) and
+  `group`; `parseWidget` (errors name the widget and the fix) and lenient
+  `loadWidgets`; `WIDGET_CATALOG`, `widgetTable()` and `widgetJsonSchema()`
+  for prompts and tool inputs; `renderWidgetLine` / `renderWidgetsLine`;
+  `describeWidgets`, a plain-JSON UI description for Claude Code mods; and
+  `hydrate`, which turns one into elements. Pure: no Node, no dependencies.
+- `plugin/`: **plugin-kit**, a Claude Code plugin that adds `$.kit`
+  (`render`, `line`, `parse`, `catalog`) to every mod that lists it under
+  `dependencies`, and folds long lists behind a button it answers itself.
+
 ## [1.1.0] - 2026-09-27
 
 Synced with the Claude Code 2.1.283 hook schema.

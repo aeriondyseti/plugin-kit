@@ -127,6 +127,25 @@ Available icons: `check cross warn info arrow bullet dot star`.
 Available colors: `black red green yellow blue magenta cyan white gray`.
 Available modifiers: `bold dim italic underline`.
 
+## Widgets
+
+Small, typed pieces of state — `text`, `counter`, `meter`, `clock`, `list`,
+`tags` — with validation a model can learn from, and two ways to draw them.
+
+```ts
+import { parseWidget, renderWidgetLine, widgetJsonSchema } from '@aeriondyseti/hook-kit/widgets';
+
+const parsed = parseWidget('Health', { type: 'meter', value: 88 });
+// { ok: false, error: 'Health: meter needs max: the value is drawn as a bar out of it' }
+
+renderWidgetLine('Health', { type: 'meter', value: 88, max: 100 }); // 'Health 88/100'
+widgetJsonSchema(); // a tool input schema whose descriptions are the catalog
+```
+
+The subpath is pure (no Node, no dependencies). In a Claude Code mod, use
+the **plugin-kit** plugin in [`plugin/`](plugin) instead: depend on it and
+draw widgets through `$.kit`. Its README covers the setup.
+
 ## Testing your hooks
 
 ```ts
