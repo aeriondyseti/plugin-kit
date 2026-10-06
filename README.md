@@ -15,13 +15,23 @@ plugins: hook scripts, styled output, and widgets that mods share through the
   `mockXxx` input factories, and normalized result fields so you can assert
   `result.wasDenied` instead of spelunking the payload.
 
+## Which part do you need?
+
+| You're writing | Use | Section |
+| --- | --- | --- |
+| A **hook script**: a `command` hook in `settings.json` or a plugin's `hooks.json` | the npm package: typed events, `OutputBuilder`, `/testing` | [Hook scripts](#a-minimal-hook) |
+| A **mod** (a plugin with function hooks) that should look like other mods and follow the user's kit settings | the **plugin-kit plugin** through `$.kit` | [Widgets in a mod: `$.kit`](#widgets-in-a-mod-kit) |
+| A **mod** that must stand alone, with no plugin to install | the widget code **vendored** into your mod | [Widgets in a mod: vendored](#widgets-in-a-mod-vendored) |
+| Hook **typings** | hook scripts: this package; mods: Claude Code's own `claude-code` types | [Hook typings](#hook-typings) |
+
 ## Install
 
 ```bash
 npm install @aeriondyseti/plugin-kit
 ```
 
-Requires Node 20+. ESM-only.
+Requires Node 20+. ESM-only. Mods don't install it: they use the plugin
+(`$.kit`) or a vendored copy, both below.
 
 ## A minimal hook
 
@@ -109,6 +119,51 @@ always means "block this" (`decision: "block"`).
 
 Each class's source file opens with a short note on when to reach for it.
 
+## Hook typings
+
+**In a hook script**, every event's input and options are exported types, in
+Claude Code's own field names (snake_case input, camelCase options):
+
+```ts
+import { PreToolUse, type PreToolUseInput, type PreToolUseEmitOptions } from '@aeriondyseti/plugin-kit';
+
+export function handle(input: PreToolUseInput): PreToolUseEmitOptions {
+    if (input.tool_name === 'Bash' && String(input.tool_input.command).includes('rm -rf')) {
+        return { decision: 'deny', reason: 'No rm -rf.' };
+    }
+    return {};
+}
+
+PreToolUse.emitOutput(handle(PreToolUse.parse()));
+```
+
+`CommonHookInput`, `HookEventName` / `HOOK_EVENT_NAMES`, `PermissionMode`,
+`PermissionUpdate` and the other shared types are exported too.
+
+**In a mod**, don't use these: Claude Code types every hook itself. The
+same settings-hook events arrive as `classic.<Event>`, already typed from the
+`claude-code` declarations the engine lays beside your mod:
+
+```ts
+import type { Register } from 'claude-code';
+
+export const register: Register = (on) => {
+    on('classic.UserPromptSubmit', ($, e, next) => {
+        // e.prompt, e.session_id, e.cwd, ... typed by Claude Code
+        return next(e);
+    });
+};
+```
+
+One difference to know: in a mod, `classic.PreToolUse` carries the tool call
+in the engine's shape (`e.tool`, narrowed per tool), not the script's
+`tool_name` / `tool_input`.
+
+The kit's own types reach a mod the same way: listing plugin-kit under
+`dependencies` lays its contract into your `.claude-plugin/types/`, so `$.kit`
+and its `Kit*` types are typed with nothing installed. A vendored kit brings
+its types with it (`import type { Widgets } from './kit/index.ts'`).
+
 ## Styled output
 
 ```ts
@@ -157,9 +212,90 @@ new OutputBuilder().appendWidgets({
 // Suspicion ◆◆◇◇◇◇
 ```
 
-The subpath is pure (no Node, no dependencies). In a Claude Code mod, use
-the **plugin-kit** plugin in [`plugin/`](plugin) instead: depend on it and
-draw widgets through `$.kit`. Its README covers the setup.
+The subpath is pure (no Node, no dependencies), which is what lets a mod use
+it too, in either of two ways.
+
+| | `$.kit` (plugin dependency) | Vendored |
+| --- | --- | --- |
+| Install | your users install plugin-kit (automatic with the allowlist) | nothing |
+| Look | the user's kit settings (`glyphs`, `barWidth`, `listLimit`) | whatever you pass |
+| Long lists | fold behind `+N more`; the kit answers the press | shown whole unless you track folding |
+| Calls | `await $.kit.render(...)` | `describeWidgets(...)`, synchronous |
+| Updates | upgrade the plugin | re-run `add-kit --vendor` |
+
+Both end in the same `hydrate`, which turns the kit's plain-JSON description
+into elements and gives every Button its `onPress`. Your own buttons get
+their handler by key: `hydrate(tree, h, { save: () => ... })`.
+
+### Widgets in a mod: `$.kit`
+
+In your plugin's folder:
+
+```bash
+npx @aeriondyseti/plugin-kit add-kit
+```
+
+That adds `{ "name": "plugin-kit", "marketplace": "aeriondyseti-plugins" }` to
+your `plugin.json` dependencies and copies `hydrate.ts` beside your hooks
+module. For installing your plugin to install the kit too, add
+`"allowCrossMarketplaceDependenciesOn": ["aeriondyseti-plugins"]` to your
+marketplace's `marketplace.json`. Then:
+
+```tsx
+import type { Register } from 'claude-code';
+import { hydrate } from './hydrate.ts';
+
+export const register: Register = (on) => {
+    on('ui.render', { component: 'Pane', requestId: 'stats' }, async ($, e, next) => {
+        const { Box } = $.ui.resolve(e);
+        const tree = await $.kit.render({
+            id: `my-mod:${e.requestId}`,
+            widgets: {
+                Health: { type: 'meter', value: 88, max: 100, color: 'red', group: 'Body' },
+                Clues: { type: 'list', value: ['a torn ticket', 'wet boots'] },
+            },
+        });
+        return <Box>{hydrate(tree, h)}</Box>;
+    });
+};
+```
+
+`$.kit` also has `line({ widgets })` for a status line, `parse({ name, widget })`
+to validate a model's input, and `catalog()` for a prompt table and a tool
+schema. The [plugin's README](plugin) covers the rest: installing it, the
+user's settings, and restyling the kit from another plugin.
+
+### Widgets in a mod: vendored
+
+In your plugin's folder:
+
+```bash
+npx @aeriondyseti/plugin-kit add-kit --vendor
+```
+
+That copies the widget code and `hydrate` into `hooks/kit/` (with an
+`index.ts` to import from) and leaves `plugin.json` alone. Then:
+
+```tsx
+import type { Register } from 'claude-code';
+import { describeWidgets, hydrate, type Widgets } from './kit/index.ts';
+
+export const register: Register = (on) => {
+    on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+        const { Box } = $.ui.resolve(e);
+        const widgets: Widgets = {
+            Health: { type: 'meter', value: 7, max: 10, color: 'red' },
+            Suspicion: { type: 'clock', value: 2, of: 6 },
+        };
+        const tree = describeWidgets(widgets, { id: 'my-mod:above', barWidth: 8 });
+        return <Box>{hydrate(tree, h)}</Box>;
+    });
+};
+```
+
+The rest of the subpath is there too: `parseWidget`, `loadWidgets`,
+`renderWidgetLine`, `widgetTable`, `widgetJsonSchema`. Re-run the command
+after upgrading to refresh the copy.
 
 ## Testing your hooks
 

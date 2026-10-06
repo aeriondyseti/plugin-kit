@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `add-kit --vendor`: copies the widget code and `hydrate` into a mod's
+  `hooks/kit/` (with an `index.ts` barrel), for mods that should stand alone
+  instead of depending on the plugin-kit plugin. The package now ships
+  `plugin/hooks/kit/` for it.
+
+### Changed
+
+- README: a guide to which part to use, a "Hook typings" section (script
+  types, and Claude Code's own typings in mods), and both ways to use widgets
+  in a mod, `$.kit` and vendored.
+
 ## [2.0.1] - 2026-10-06
 
 The first release published by the release workflow under the new name.

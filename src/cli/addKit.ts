@@ -53,6 +53,53 @@ export function addKit(pluginDir: string, hydrateSource: string): AddKitResult {
     return { dependencyAdded, hydratePath: relative(pluginDir, target).replaceAll('\\', '/'), hydrate };
 }
 
+export const VENDOR_HEADER =
+    '// Copied by `npx @aeriondyseti/plugin-kit add-kit --vendor`; run it again to update. Do not edit.\n';
+
+/** The barrel a vendored kit gets, so a mod imports from one file. */
+export const VENDOR_INDEX = [
+    "export * from './types.ts';",
+    "export * from './parse.ts';",
+    "export * from './catalog.ts';",
+    "export * from './line.ts';",
+    "export * from './describe.ts';",
+    "export * from './hydrate.ts';",
+    '',
+].join('\n');
+
+export interface VendorKitResult {
+    /** The kit folder, relative to the plugin folder. */
+    folder: string;
+    written: number;
+    unchanged: number;
+}
+
+/**
+ * Copies the widget code itself into the plugin, beside its hooks module:
+ * no dependency on the plugin-kit plugin, no shared settings or state. Each
+ * source's own first-line header is replaced by one that names this command.
+ */
+export function vendorKit(pluginDir: string, sources: Record<string, string>): VendorKitResult {
+    if (!existsSync(join(pluginDir, '.claude-plugin', 'plugin.json'))) {
+        throw new Error(`${pluginDir} is not a plugin: no .claude-plugin/plugin.json`);
+    }
+    const folder = join(hooksFolder(pluginDir), 'kit');
+    mkdirSync(folder, { recursive: true });
+    let written = 0;
+    let unchanged = 0;
+    for (const [name, source] of Object.entries({ ...sources, 'index.ts': VENDOR_INDEX })) {
+        const wanted = `${VENDOR_HEADER}\n${source.replace(/^\/\/[^\n]*\n\n?/, '')}`;
+        const target = join(folder, name);
+        if (existsSync(target) && readFileSync(target, 'utf8') === wanted) {
+            unchanged++;
+            continue;
+        }
+        writeFileSync(target, wanted);
+        written++;
+    }
+    return { folder: relative(pluginDir, folder).replaceAll('\\', '/'), written, unchanged };
+}
+
 function isKitDependency(entry: unknown): boolean {
     if (typeof entry === 'string') return entry === 'plugin-kit' || entry.startsWith('plugin-kit@');
     return isRecord(entry) && entry.name === 'plugin-kit';

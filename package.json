@@ -34,6 +34,7 @@
     "files": [
         "dist",
         "src/widgets/hydrate.ts",
+        "plugin/hooks/kit",
         "examples",
         "README.md",
         "CHANGELOG.md",

@@ -4,6 +4,10 @@ A Claude Code plugin that gives every mod a `$.kit`: hand it widgets, draw
 what it returns. Plugins that use it look and behave the same, and the kit
 owns the small interactions (a long list folds behind `+3 more`).
 
+A mod that must stand alone can instead copy the widget code in with
+`npx @aeriondyseti/plugin-kit add-kit --vendor`; see the
+[package README](../README.md#widgets-in-a-mod-vendored).
+
 ## Installing
 
 plugin-kit is listed in the `aeriondyseti-plugins` marketplace:
