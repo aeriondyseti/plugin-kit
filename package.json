@@ -22,6 +22,10 @@
         "./testing": {
             "types": "./dist/testing.d.ts",
             "import": "./dist/testing.js"
+        },
+        "./widgets": {
+            "types": "./dist/widgets.d.ts",
+            "import": "./dist/widgets.js"
         }
     },
     "files": [
