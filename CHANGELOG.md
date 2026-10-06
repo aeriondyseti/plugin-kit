@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-06
+
+Fixtures, hooks in mods, the status line, and mod test helpers.
+
 ### Added
 
 - **Fixtures.** `plugin-kit record`, a command hook that saves each payload
@@ -218,7 +222,8 @@ new compile errors in code that relied on the old (wrong) shapes:
   showing deny / allow / ask / `updatedInput` / context-injection
   patterns.
 
-[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/aeriondyseti/plugin-kit/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.2.0
 [2.1.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.1.0
 [2.0.1]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.1
 [2.0.0]: https://github.com/aeriondyseti/plugin-kit/releases/tag/v2.0.0
