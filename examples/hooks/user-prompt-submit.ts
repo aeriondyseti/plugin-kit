@@ -9,6 +9,7 @@
  * In a real project, replace the relative import with:
  *   import { runHook, UserPromptSubmit, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
+import { pathToFileURL } from 'node:url';
 import { ICONS, OutputBuilder, runHook, UserPromptSubmit } from '../../src/index.js';
 
 const FORBIDDEN_TOKENS = ['leak-my-secrets', 'exfiltrate'];
@@ -36,6 +37,6 @@ export function handle(input: ReturnType<typeof UserPromptSubmit.parse>): void {
     UserPromptSubmit.emitOutput({ toUser });
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     runHook(() => handle(UserPromptSubmit.parse()));
 }

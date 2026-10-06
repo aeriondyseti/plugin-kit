@@ -16,6 +16,7 @@
  * In a real project, replace the relative import with:
  *   import { runHook, PreToolUse } from '@aeriondyseti/plugin-kit';
  */
+import { pathToFileURL } from 'node:url';
 import { PreToolUse, runHook } from '../../src/index.js';
 
 export function handle(input: ReturnType<typeof PreToolUse.parse>): void {
@@ -41,6 +42,6 @@ export function handle(input: ReturnType<typeof PreToolUse.parse>): void {
     PreToolUse.emitOutput({});
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     runHook(() => handle(PreToolUse.parse()));
 }

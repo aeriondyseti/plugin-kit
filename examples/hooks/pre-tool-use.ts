@@ -10,6 +10,7 @@
  * In a real project, replace the relative import with:
  *   import { runHook, PreToolUse, OutputBuilder, ICONS } from '@aeriondyseti/plugin-kit';
  */
+import { pathToFileURL } from 'node:url';
 import { ICONS, OutputBuilder, PreToolUse, runHook } from '../../src/index.js';
 import { flatten } from './_flatten.js';
 
@@ -38,6 +39,6 @@ export function handle(input: ReturnType<typeof PreToolUse.parse>): void {
 }
 
 // Only drive stdin when run as a script, not when imported by tests.
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     runHook(() => handle(PreToolUse.parse()));
 }
