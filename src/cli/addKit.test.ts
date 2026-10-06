@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { addKit, HYDRATE_HEADER, KIT_DEPENDENCY, VENDOR_HEADER, vendorKit } from './addKit.js';
+import { addKit, HYDRATE_HEADER, KIT_DEPENDENCY, VENDOR_HEADER, vendorFiles } from './addKit.js';
 
 function plugin(manifest: object, hooksJson?: object): string {
     const dir = mkdtempSync(join(tmpdir(), 'add-kit-'));
@@ -62,13 +62,20 @@ describe('addKit', () => {
         const dir = plugin({ name: 'mine' });
         const sources = { 'types.ts': '// Generated from src/x.ts. Do not edit.\n\nexport type A = 1;\n', 'hydrate.ts': '/** h */\n' };
 
-        expect(vendorKit(dir, sources)).toEqual({ folder: 'hooks/kit', written: 3, unchanged: 0 });
+        expect(vendorFiles(dir, 'kit', sources)).toEqual({ folder: 'hooks/kit', written: 3, unchanged: 0 });
         expect(readFileSync(join(dir, 'hooks', 'kit', 'types.ts'), 'utf8')).toBe(`${VENDOR_HEADER}\nexport type A = 1;\n`);
         expect(readFileSync(join(dir, 'hooks', 'kit', 'hydrate.ts'), 'utf8')).toBe(`${VENDOR_HEADER}\n/** h */\n`);
         expect(readFileSync(join(dir, 'hooks', 'kit', 'index.ts'), 'utf8')).toContain("export * from './describe.ts';");
         expect(manifestOf(dir).dependencies).toBeUndefined();
 
-        expect(vendorKit(dir, sources)).toEqual({ folder: 'hooks/kit', written: 0, unchanged: 3 });
+        expect(vendorFiles(dir, 'kit', sources)).toEqual({ folder: 'hooks/kit', written: 0, unchanged: 3 });
+    });
+
+    it('vendors the adapter beside the hooks module and testing helpers under tests/', () => {
+        const dir = plugin({ name: 'mine' });
+        expect(vendorFiles(dir, 'adapter', { 'index.ts': '/** a */\n' })).toEqual({ folder: 'hooks/adapter', written: 1, unchanged: 0 });
+        expect(readFileSync(join(dir, 'hooks', 'adapter', 'index.ts'), 'utf8')).toMatch(/^\/\/ Copied by `npx @aeriondyseti\/plugin-kit vendor adapter`/);
+        expect(vendorFiles(dir, 'testing', { 'index.ts': '/** t */\n' }).folder).toBe('tests/kit-testing');
     });
 
     it('refuses a folder that is not a plugin', () => {

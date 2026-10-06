@@ -8,12 +8,14 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fixturesModule, loadFixture, loadFixtures, recordFixture, type Fixture } from '../fixtures.js';
-import { addKit, vendorKit } from './addKit.js';
+import { addKit, VENDOR_TARGETS, vendorFiles, type VendorTarget } from './addKit.js';
 import { formatResults, runFixtures } from './run.js';
 
 const USAGE = `usage: plugin-kit <command>
 
   add-kit [--vendor] [plugin-dir]        set a plugin up to draw kit widgets
+  vendor <kit|adapter|testing> [plugin-dir]
+                                         copy kit code into a plugin (mods can't import npm)
   record [--out <dir>]                   (a command hook) save each payload as a fixture
   run <command> <fixture|dir>... [--event <E>] [--json]
                                          replay fixtures through a hook command
@@ -26,22 +28,9 @@ const shipped = (path: string) => fileURLToPath(new URL(`../${path}`, import.met
 
 const COMMANDS: Record<string, (args: Args) => number> = {
     'add-kit': ({ positional, flags }) => {
+        if (flags.has('vendor')) return vendor('kit', positional[0]);
         const dir = resolve(positional[0] ?? '.');
-        const hydrateSource = readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8');
-        if (flags.has('vendor')) {
-            const kitDir = shipped('plugin/hooks/kit');
-            const sources: Record<string, string> = { 'hydrate.ts': hydrateSource };
-            for (const name of readdirSync(kitDir)) sources[name] = readFileSync(join(kitDir, name), 'utf8');
-            const result = vendorKit(dir, sources);
-            console.log(`✓ ${result.folder}/: ${result.written} written, ${result.unchanged} unchanged`);
-            console.log(`
-Then draw, with no dependency on the plugin-kit plugin:
-  import { describeWidgets, hydrate } from './kit/index.ts'
-  const tree = describeWidgets(widgets, { id: \`my-plugin:\${e.requestId}\` })
-  return <Box>{hydrate(tree, h)}</Box>`);
-            return 0;
-        }
-        const result = addKit(dir, hydrateSource);
+        const result = addKit(dir, readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8'));
         console.log(result.dependencyAdded
             ? '✓ plugin.json now depends on plugin-kit@aeriondyseti-plugins'
             : '· plugin.json already depends on plugin-kit');
@@ -54,6 +43,12 @@ Then draw:
   const tree = await $.kit.render({ id: \`my-plugin:\${e.requestId}\`, widgets })
   return <Box>{hydrate(tree, h)}</Box>`);
         return 0;
+    },
+
+    vendor: ({ positional }) => {
+        const [target, dir] = positional;
+        if (!VENDOR_TARGETS.includes(target as VendorTarget)) throw new UsageError(`vendor needs one of ${VENDOR_TARGETS.join(', ')}`);
+        return vendor(target as VendorTarget, dir);
     },
 
     // Runs as a command hook: it must never get in Claude Code's way, so it
@@ -98,6 +93,33 @@ Then draw:
         return 0;
     },
 };
+
+const VENDOR_USE: Record<VendorTarget, string> = {
+    kit: `Then draw, with no dependency on the plugin-kit plugin:
+  import { describeWidgets, hydrate } from './kit/index.ts'
+  const tree = describeWidgets(widgets, { id: \`my-plugin:\${e.requestId}\` })
+  return <Box>{hydrate(tree, h)}</Box>`,
+    adapter: `Then run a hook policy in your mod:
+  import { toClassic } from './adapter/index.ts'
+  on('classic.UserPromptSubmit', ($, e, next) => toClassic('UserPromptSubmit', handle(e)) ?? next(e))`,
+    testing: `Then, in a *.test.tsx:
+  import { mountTarget, SURFACES } from './kit-testing/index.ts'
+  const ui = await $.ui.mount(mountTarget('my-plugin', 'AbovePrompt', surface))`,
+};
+
+function vendor(target: VendorTarget, dir = '.'): number {
+    const sources: Record<string, string> = {};
+    if (target === 'kit') {
+        const kitDir = shipped('plugin/hooks/kit');
+        for (const name of readdirSync(kitDir)) sources[name] = readFileSync(join(kitDir, name), 'utf8');
+        sources['hydrate.ts'] = readFileSync(shipped('src/widgets/hydrate.ts'), 'utf8');
+    } else {
+        sources['index.ts'] = readFileSync(shipped(target === 'adapter' ? 'src/adapter/index.ts' : 'src/mod-testing/index.ts'), 'utf8');
+    }
+    const result = vendorFiles(resolve(dir), target, sources);
+    console.log(`✓ ${result.folder}/: ${result.written} written, ${result.unchanged} unchanged\n\n${VENDOR_USE[target]}`);
+    return 0;
+}
 
 class UsageError extends Error {}
 

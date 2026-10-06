@@ -67,28 +67,41 @@ export const VENDOR_INDEX = [
     '',
 ].join('\n');
 
-export interface VendorKitResult {
-    /** The kit folder, relative to the plugin folder. */
+/**
+ * What `plugin-kit vendor` can copy into a plugin, since a mod (and its
+ * tests) can import only the plugin's own files:
+ * - `kit`: the widget code and `hydrate`, into `<hooks>/kit/`;
+ * - `adapter`: the command-hook ↔ mod adapter, into `<hooks>/adapter/`;
+ * - `testing`: helpers for `claude plugin test`, into `tests/kit-testing/`.
+ */
+export type VendorTarget = 'kit' | 'adapter' | 'testing';
+
+export const VENDOR_TARGETS: readonly VendorTarget[] = ['kit', 'adapter', 'testing'];
+
+export interface VendorResult {
+    /** The folder written, relative to the plugin folder. */
     folder: string;
     written: number;
     unchanged: number;
 }
 
 /**
- * Copies the widget code itself into the plugin, beside its hooks module:
- * no dependency on the plugin-kit plugin, no shared settings or state. Each
- * source's own first-line header is replaced by one that names this command.
+ * Copies `sources` (file name → text) into the target's folder in the
+ * plugin. Each source's own first-line header comment is replaced by one
+ * naming this command; the kit also gets an `index.ts` barrel.
  */
-export function vendorKit(pluginDir: string, sources: Record<string, string>): VendorKitResult {
+export function vendorFiles(pluginDir: string, target: VendorTarget, sources: Record<string, string>): VendorResult {
     if (!existsSync(join(pluginDir, '.claude-plugin', 'plugin.json'))) {
         throw new Error(`${pluginDir} is not a plugin: no .claude-plugin/plugin.json`);
     }
-    const folder = join(hooksFolder(pluginDir), 'kit');
+    const folder = target === 'testing' ? join(pluginDir, 'tests', 'kit-testing') : join(hooksFolder(pluginDir), target);
+    const header = target === 'kit' ? VENDOR_HEADER : VENDOR_HEADER.replace('add-kit --vendor', `vendor ${target}`);
+    const files = target === 'kit' ? { ...sources, 'index.ts': VENDOR_INDEX } : sources;
     mkdirSync(folder, { recursive: true });
     let written = 0;
     let unchanged = 0;
-    for (const [name, source] of Object.entries({ ...sources, 'index.ts': VENDOR_INDEX })) {
-        const wanted = `${VENDOR_HEADER}\n${source.replace(/^\/\/[^\n]*\n\n?/, '')}`;
+    for (const [name, source] of Object.entries(files)) {
+        const wanted = `${header}\n${source.replace(/^\/\/[^\n]*\n\n?/, '')}`;
         const target = join(folder, name);
         if (existsSync(target) && readFileSync(target, 'utf8') === wanted) {
             unchanged++;
