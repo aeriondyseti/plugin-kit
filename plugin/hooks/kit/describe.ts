@@ -27,7 +27,8 @@ export type WidgetAction = 'more' | 'less';
 /** Which characters draw bars, segments, bullets and separators. */
 export type WidgetGlyphs = 'unicode' | 'ascii';
 
-const GLYPHS: Record<WidgetGlyphs, { full: string; empty: string; on: string; off: string; bullet: string; dot: string }> = {
+/** The characters each glyph set draws with; shared by every renderer. */
+export const GLYPHS: Record<WidgetGlyphs, { full: string; empty: string; on: string; off: string; bullet: string; dot: string }> = {
     unicode: { full: '▰', empty: '▱', on: '◆', off: '◇', bullet: ICONS.bullet, dot: ICONS.dot },
     ascii: { full: '#', empty: '-', on: '*', off: '.', bullet: '-', dot: '|' },
 };
