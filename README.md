@@ -15,6 +15,9 @@ plugins: hook scripts, styled output, and widgets that mods share through the
   `mockXxx` input factories, and normalized result fields so you can assert
   `result.wasDenied` instead of spelunking the payload.
 
+**Documentation:** the [wiki](https://github.com/aeriondyseti/plugin-kit/wiki),
+also in [`docs/`](docs/Home.md). This README is the quick tour.
+
 ## Which part do you need?
 
 | You're writing | Use | Section |
@@ -351,6 +354,10 @@ script.
 | [`session-start.ts`](examples/hooks/session-start.ts)            | Context-injection pattern (no deny concept)                 |
 
 ## Project direction
+
+- [`docs/`](docs/Home.md) — the full documentation, published to the
+  [wiki](https://github.com/aeriondyseti/plugin-kit/wiki) with
+  `npm run docs:wiki`.
 
 - [`ROADMAP.md`](ROADMAP.md) — features under consideration for future
   releases.

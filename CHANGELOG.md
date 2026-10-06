@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `docs/`: full documentation, one page per topic (getting started, hook
+  scripts, hook typings, styled output, widgets, widgets in mods, the
+  plugin, testing, contributing), published to the GitHub wiki by
+  `npm run docs:wiki`. `npm test` fails on a broken link between pages.
 - README: a guide to which part to use, a "Hook typings" section (script
   types, and Claude Code's own typings in mods), and both ways to use widgets
   in a mod, `$.kit` and vendored.

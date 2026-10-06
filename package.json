@@ -61,6 +61,7 @@
         "typecheck": "tsc --noEmit && tsc -p tsconfig.contract.json",
         "plugin:sync": "node scripts/sync-plugin.mjs",
         "plugin:check": "claude plugin validate plugin && claude plugin test plugin",
+        "docs:wiki": "node scripts/sync-wiki.mjs",
         "test": "vitest run",
         "test:watch": "vitest"
     },
