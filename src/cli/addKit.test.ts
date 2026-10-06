@@ -50,6 +50,14 @@ describe('addKit', () => {
         expect(addKit(dir, 'new').hydrate).toBe('updated');
     });
 
+    it('creates hooks/ for a plugin that has none yet', () => {
+        const dir = mkdtempSync(join(tmpdir(), 'add-kit-'));
+        mkdirSync(join(dir, '.claude-plugin'));
+        writeFileSync(join(dir, '.claude-plugin', 'plugin.json'), '{"name":"t"}');
+        expect(addKit(dir, 'x').hydratePath).toBe('hooks/hydrate.ts');
+        expect(readFileSync(join(dir, 'hooks', 'hydrate.ts'), 'utf8')).toBe(`${HYDRATE_HEADER}x`);
+    });
+
     it('refuses a folder that is not a plugin', () => {
         const dir = mkdtempSync(join(tmpdir(), 'add-kit-'));
         expect(() => addKit(dir, '')).toThrow(/no \.claude-plugin\/plugin\.json/);

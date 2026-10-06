@@ -8,14 +8,14 @@
  *   can't import it from us (rewritten when ours changed).
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
 /** How a dependent plugin names the kit: ours is not in its marketplace. */
 export const KIT_DEPENDENCY = { name: 'plugin-kit', marketplace: 'aeriondyseti-plugins' } as const;
 
 export const HYDRATE_HEADER =
-    '// Copied by `npx @aeriondyseti/hook-kit add-kit`; run it again to update. Do not edit.\n\n';
+    '// Copied by `npx @aeriondyseti/plugin-kit add-kit`; run it again to update. Do not edit.\n\n';
 
 export interface AddKitResult {
     /** False when plugin.json already depended on plugin-kit. */
@@ -45,7 +45,10 @@ export function addKit(pluginDir: string, hydrateSource: string): AddKitResult {
     const wanted = HYDRATE_HEADER + hydrateSource;
     const current = existsSync(target) ? readFileSync(target, 'utf8') : undefined;
     const hydrate = current === undefined ? 'created' : current === wanted ? 'unchanged' : 'updated';
-    if (hydrate !== 'unchanged') writeFileSync(target, wanted);
+    if (hydrate !== 'unchanged') {
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, wanted);
+    }
 
     return { dependencyAdded, hydratePath: relative(pluginDir, target).replaceAll('\\', '/'), hydrate };
 }
